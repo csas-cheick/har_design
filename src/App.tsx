@@ -2,6 +2,7 @@ import { FC } from "react";
 import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
 import Header from "./components/Header";
 import Footer from "./components/Footer";
+import WhatsAppButton from "./components/WhatsAppButton";
 import Accueil from "./Accueil";
 import About from "./pages/About";
 import Contact from "./pages/Contact";
@@ -12,7 +13,13 @@ import Register from "./pages/Register";
 import Dashboard from "./pages/admin/Dashboard";
 import Products from "./pages/admin/Products";
 import ProductForm from "./pages/admin/ProductForm";
+import Orders from "./pages/admin/Orders";
+import Customers from "./pages/admin/Customers";
 import Cash from "./pages/admin/Cash";
+import CoutureModels from "./pages/admin/CoutureModels";
+import Measurements from "./pages/admin/Measurements";
+import CustomOrders from "./pages/admin/CustomOrders";
+import ClientOrders from "./pages/ClientOrders";
 import { CartProvider } from "./context/CartContext";
 import { AuthProvider, useAuth } from "./context/AuthContext";
 
@@ -51,7 +58,12 @@ const App: FC = () => {
                     <Route path="/products" element={<Products />} />
                     <Route path="/products/new" element={<ProductForm />} />
                     <Route path="/products/edit/:id" element={<ProductForm />} />
+                    <Route path="/orders" element={<Orders />} />
+                    <Route path="/customers" element={<Customers />} />
                     <Route path="/cash" element={<Cash />} />
+                    <Route path="/couture-models" element={<CoutureModels />} />
+                    <Route path="/measurements" element={<Measurements />} />
+                    <Route path="/custom-orders" element={<CustomOrders />} />
                   </Routes>
                 </AdminRoute>
               }
@@ -70,8 +82,10 @@ const App: FC = () => {
                       <Route path="/about" element={<About />} />
                       <Route path="/contact" element={<Contact />} />
                       <Route path="/cart" element={<Cart />} />
+                      <Route path="/my-orders" element={<ClientOrders />} />
                     </Routes>
                   </main>
+                  <WhatsAppButton />
                   <Footer />
                 </div>
               }

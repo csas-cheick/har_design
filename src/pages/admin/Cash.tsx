@@ -1,24 +1,20 @@
-import { FC, useState } from "react";
-import { Link } from "react-router-dom";
+import { FC, useState, useEffect } from "react";
 import { 
-  FiPackage, 
-  FiShoppingBag, 
-  FiUsers, 
   FiDollarSign, 
-  FiTrendingUp,
-  FiLogOut,
-  FiSettings,
   FiPlus,
   FiMinus,
   FiPrinter,
   FiCalendar,
-  FiCreditCard
+  FiCreditCard,
+  FiTrendingUp
 } from "react-icons/fi";
+import AdminLayout from "../../components/admin/AdminLayout";
 import { useAuth } from "../../context/AuthContext";
-import { useNavigate } from "react-router-dom";
+import { db } from "../../firebase";
+import { collection, addDoc, query, orderBy, onSnapshot } from "firebase/firestore";
 
 interface Transaction {
-  id: number;
+  id: string;
   type: "entree" | "sortie" | "vente";
   amount: number;
   description: string;
@@ -27,11 +23,11 @@ interface Transaction {
 }
 
 const Cash: FC = () => {
-  const { user, logout } = useAuth();
-  const navigate = useNavigate();
+  const { user } = useAuth();
   const [selectedDate, setSelectedDate] = useState(new Date().toISOString().split('T')[0]);
   const [showTransactionModal, setShowTransactionModal] = useState(false);
   const [transactionType, setTransactionType] = useState<"entree" | "sortie">("entree");
+  const [transactions, setTransactions] = useState<Transaction[]>([]);
 
   const [formData, setFormData] = useState({
     amount: "",
@@ -39,21 +35,18 @@ const Cash: FC = () => {
     paymentMethod: "especes" as "especes" | "mobile" | "carte",
   });
 
-  const handleLogout = () => {
-    logout();
-    navigate("/login");
-  };
+  useEffect(() => {
+    const q = query(collection(db, "transactions"), orderBy("timestamp", "desc"));
+    const unsubscribe = onSnapshot(q, (snapshot) => {
+      const transactionsData = snapshot.docs.map(doc => ({
+        id: doc.id,
+        ...doc.data()
+      })) as Transaction[];
+      setTransactions(transactionsData);
+    });
 
-  // Données de démonstration
-  const [transactions, setTransactions] = useState<Transaction[]>([
-    { id: 1, type: "vente", amount: 45000, description: "Vente Produit #1234", paymentMethod: "especes", timestamp: "2025-11-24T09:30:00" },
-    { id: 2, type: "vente", amount: 75000, description: "Vente Produit #1235", paymentMethod: "mobile", timestamp: "2025-11-24T10:15:00" },
-    { id: 3, type: "entree", amount: 100000, description: "Approvisionnement initial", paymentMethod: "especes", timestamp: "2025-11-24T08:00:00" },
-    { id: 4, type: "sortie", amount: 15000, description: "Achat fournitures", paymentMethod: "especes", timestamp: "2025-11-24T11:30:00" },
-    { id: 5, type: "vente", amount: 35000, description: "Vente Produit #1236", paymentMethod: "carte", timestamp: "2025-11-24T13:45:00" },
-    { id: 6, type: "sortie", amount: 5000, description: "Frais divers", paymentMethod: "especes", timestamp: "2025-11-24T14:20:00" },
-    { id: 7, type: "vente", amount: 55000, description: "Vente Produit #1237", paymentMethod: "mobile", timestamp: "2025-11-24T15:00:00" },
-  ]);
+    return () => unsubscribe();
+  }, []);
 
   const formatPrice = (price: number) => {
     return price.toString().replace(/\B(?=(\d{3})+(?!\d))/g, " ");
@@ -76,19 +69,22 @@ const Cash: FC = () => {
   const mobile = todayTransactions.filter(t => t.paymentMethod === "mobile" && t.type !== "sortie").reduce((sum, t) => sum + t.amount, 0);
   const carte = todayTransactions.filter(t => t.paymentMethod === "carte" && t.type !== "sortie").reduce((sum, t) => sum + t.amount, 0);
 
-  const handleAddTransaction = (e: React.FormEvent) => {
+  const handleAddTransaction = async (e: React.FormEvent) => {
     e.preventDefault();
-    const newTransaction: Transaction = {
-      id: transactions.length + 1,
-      type: transactionType,
-      amount: parseFloat(formData.amount),
-      description: formData.description,
-      paymentMethod: formData.paymentMethod,
-      timestamp: new Date().toISOString(),
-    };
-    setTransactions([newTransaction, ...transactions]);
-    setShowTransactionModal(false);
-    setFormData({ amount: "", description: "", paymentMethod: "especes" });
+    try {
+      await addDoc(collection(db, "transactions"), {
+        type: transactionType,
+        amount: parseFloat(formData.amount),
+        description: formData.description,
+        paymentMethod: formData.paymentMethod,
+        timestamp: new Date().toISOString(),
+        userId: user?.id
+      });
+      setShowTransactionModal(false);
+      setFormData({ amount: "", description: "", paymentMethod: "especes" });
+    } catch (error) {
+      console.error("Error adding transaction: ", error);
+    }
   };
 
   const handlePrint = () => {
@@ -96,100 +92,22 @@ const Cash: FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      {/* Header */}
-      <header className="bg-white border-b border-gray-200 sticky top-0 z-10 print:hidden">
-        <div className="px-6 py-4">
-          <div className="flex items-center justify-between">
-            <div>
-              <h1 className="text-2xl font-bold text-gray-900">HAR DESIGN</h1>
-              <p className="text-sm text-gray-600">Dashboard Administrateur</p>
-            </div>
-            <div className="flex items-center gap-4">
-              <div className="text-right">
-                <p className="text-sm font-medium text-gray-900">
-                  {user?.firstName} {user?.lastName}
-                </p>
-                <p className="text-xs text-gray-500">{user?.role}</p>
-              </div>
-              <button
-                onClick={handleLogout}
-                className="p-2 text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-lg transition-colors"
-                aria-label="Déconnexion"
-              >
-                <FiLogOut className="w-5 h-5" />
-              </button>
-            </div>
-          </div>
+    <AdminLayout>
+      {/* Header Section */}
+      <div className="flex items-center justify-between mb-6 print:hidden">
+        <div>
+          <h2 className="text-2xl font-bold text-gray-900">Gestion de la Caisse</h2>
+          <p className="text-gray-600 mt-1">Suivez les mouvements de caisse journaliers</p>
         </div>
-      </header>
-
-      <div className="flex">
-        {/* Sidebar */}
-        <aside className="w-64 bg-white border-r border-gray-200 min-h-[calc(100vh-73px)] print:hidden">
-          <nav className="p-4 space-y-1">
-            <Link
-              to="/admin"
-              className="flex items-center gap-3 px-4 py-3 text-gray-600 hover:bg-gray-50 rounded-lg transition-colors"
-            >
-              <FiTrendingUp className="w-5 h-5" />
-              <span>Tableau de bord</span>
-            </Link>
-            <Link
-              to="/admin/products"
-              className="flex items-center gap-3 px-4 py-3 text-gray-600 hover:bg-gray-50 rounded-lg transition-colors"
-            >
-              <FiPackage className="w-5 h-5" />
-              <span>Produits</span>
-            </Link>
-            <Link
-              to="/admin/orders"
-              className="flex items-center gap-3 px-4 py-3 text-gray-600 hover:bg-gray-50 rounded-lg transition-colors"
-            >
-              <FiShoppingBag className="w-5 h-5" />
-              <span>Commandes</span>
-            </Link>
-            <Link
-              to="/admin/customers"
-              className="flex items-center gap-3 px-4 py-3 text-gray-600 hover:bg-gray-50 rounded-lg transition-colors"
-            >
-              <FiUsers className="w-5 h-5" />
-              <span>Clients</span>
-            </Link>
-            <Link
-              to="/admin/measurements"
-              className="flex items-center gap-3 px-4 py-3 text-gray-600 hover:bg-gray-50 rounded-lg transition-colors"
-            >
-              <FiSettings className="w-5 h-5" />
-              <span>Mesures Couture</span>
-            </Link>
-            <Link
-              to="/admin/cash"
-              className="flex items-center gap-3 px-4 py-3 text-gray-900 bg-gray-100 rounded-lg font-medium"
-            >
-              <FiDollarSign className="w-5 h-5" />
-              <span>Caisse</span>
-            </Link>
-          </nav>
-        </aside>
-
-        {/* Main Content */}
-        <main className="flex-1 p-6">
-          {/* Header Section */}
-          <div className="flex items-center justify-between mb-6 print:hidden">
-            <div>
-              <h2 className="text-2xl font-bold text-gray-900">Gestion de la Caisse</h2>
-              <p className="text-gray-600 mt-1">Suivez les mouvements de caisse journaliers</p>
-            </div>
-            <div className="flex gap-3">
-              <button
-                onClick={handlePrint}
-                className="flex items-center gap-2 bg-white border border-gray-300 text-gray-700 px-4 py-2.5 rounded-lg font-medium hover:bg-gray-50 transition-colors"
-              >
-                <FiPrinter className="w-5 h-5" />
-                Imprimer
-              </button>
-              <button
+        <div className="flex gap-3">
+          <button
+            onClick={handlePrint}
+            className="flex items-center gap-2 bg-white border border-gray-300 text-gray-700 px-4 py-2.5 rounded-lg font-medium hover:bg-gray-50 transition-colors"
+          >
+            <FiPrinter className="w-5 h-5" />
+            Imprimer
+          </button>
+          <button
                 onClick={() => {
                   setTransactionType("entree");
                   setShowTransactionModal(true);
@@ -433,8 +351,6 @@ const Cash: FC = () => {
           </div>
         </div>
       </div>
-        </main>
-      </div>
 
       {/* Transaction Modal */}
       {showTransactionModal && (
@@ -523,7 +439,7 @@ const Cash: FC = () => {
           </div>
         </div>
       )}
-    </div>
+    </AdminLayout>
   );
 };
 

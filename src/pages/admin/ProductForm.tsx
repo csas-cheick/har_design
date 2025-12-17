@@ -1,4 +1,4 @@
-import { FC, useState } from "react";
+import { FC, useState, useEffect } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import { 
   FiArrowLeft,
@@ -7,12 +7,17 @@ import {
   FiUpload
 } from "react-icons/fi";
 import { useAuth } from "../../context/AuthContext";
+import { db } from "../../firebase";
+import { collection, addDoc, updateDoc, doc, getDoc } from "firebase/firestore";
+import { uploadToCloudinary } from "../../utils/cloudinary";
 
 const ProductForm: FC = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const { user } = useAuth();
   const isEditMode = !!id;
+  const [loading, setLoading] = useState(false);
+  const [imageFile, setImageFile] = useState<File | null>(null);
 
   const [formData, setFormData] = useState({
     name: "",
@@ -24,6 +29,32 @@ const ProductForm: FC = () => {
   });
 
   const [imagePreview, setImagePreview] = useState<string | null>(null);
+
+  useEffect(() => {
+    const fetchProduct = async () => {
+      if (isEditMode && id) {
+        try {
+          const docRef = doc(db, "products", id);
+          const docSnap = await getDoc(docRef);
+          if (docSnap.exists()) {
+            const data = docSnap.data();
+            setFormData({
+              name: data.name,
+              category: data.category,
+              price: data.price.toString(),
+              stock: data.stock.toString(),
+              description: data.description,
+              image: data.image
+            });
+            setImagePreview(data.image);
+          }
+        } catch (error) {
+          console.error("Error fetching product:", error);
+        }
+      }
+    };
+    fetchProduct();
+  }, [isEditMode, id]);
 
   const categories = ["Vêtements", "Chaussures", "Accessoires", "Couture"];
 
@@ -38,20 +69,52 @@ const ProductForm: FC = () => {
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
+      setImageFile(file);
       const reader = new FileReader();
       reader.onloadend = () => {
         setImagePreview(reader.result as string);
-        setFormData({ ...formData, image: reader.result as string });
       };
       reader.readAsDataURL(file);
     }
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    console.log("Product data:", formData);
-    // Logique de sauvegarde ici
-    navigate("/admin/products");
+    setLoading(true);
+
+    try {
+      let imageUrl = formData.image;
+
+      if (imageFile) {
+        imageUrl = await uploadToCloudinary(imageFile);
+      }
+
+      const productData = {
+        name: formData.name,
+        category: formData.category,
+        price: parseFloat(formData.price),
+        stock: parseInt(formData.stock),
+        description: formData.description,
+        image: imageUrl,
+        updatedAt: new Date().toISOString()
+      };
+
+      if (isEditMode && id) {
+        await updateDoc(doc(db, "products", id), productData);
+      } else {
+        await addDoc(collection(db, "products"), {
+          ...productData,
+          createdAt: new Date().toISOString()
+        });
+      }
+
+      navigate("/admin/products");
+    } catch (error) {
+      console.error("Error saving product:", error);
+      alert("Une erreur est survenue lors de l'enregistrement du produit");
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -244,10 +307,15 @@ const ProductForm: FC = () => {
             </Link>
             <button
               type="submit"
-              className="flex-1 flex items-center justify-center gap-2 bg-black text-white px-6 py-3 rounded-lg font-semibold hover:bg-gray-800 transition-colors"
+              disabled={loading}
+              className={`flex-1 flex items-center justify-center gap-2 bg-black text-white px-6 py-3 rounded-lg font-semibold hover:bg-gray-800 transition-colors ${loading ? 'opacity-50 cursor-not-allowed' : ''}`}
             >
-              <FiSave className="w-5 h-5" />
-              {isEditMode ? "Enregistrer les modifications" : "Ajouter le produit"}
+              {loading ? (
+                <span className="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></span>
+              ) : (
+                <FiSave className="w-5 h-5" />
+              )}
+              {loading ? "Enregistrement..." : (isEditMode ? "Enregistrer les modifications" : "Ajouter le produit")}
             </button>
           </div>
         </form>

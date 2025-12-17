@@ -1,24 +1,19 @@
-import { FC, useState } from "react";
+import { FC, useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { 
   FiPackage, 
-  FiShoppingBag, 
-  FiUsers, 
-  FiDollarSign, 
-  FiTrendingUp,
-  FiLogOut,
-  FiSettings,
-  FiEdit,
-  FiTrash2,
-  FiPlus,
-  FiSearch,
-  FiX
+  FiEdit, 
+  FiTrash2, 
+  FiPlus, 
+  FiSearch, 
+  FiX 
 } from "react-icons/fi";
-import { useAuth } from "../../context/AuthContext";
-import { useNavigate } from "react-router-dom";
+import AdminLayout from "../../components/admin/AdminLayout";
+import { db } from "../../firebase";
+import { collection, onSnapshot, deleteDoc, doc, query, orderBy } from "firebase/firestore";
 
 interface Product {
-  id: number;
+  id: string;
   name: string;
   category: string;
   price: number;
@@ -28,28 +23,29 @@ interface Product {
 }
 
 const Products: FC = () => {
-  const { user, logout } = useAuth();
-  const navigate = useNavigate();
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("Tous");
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [productToDelete, setProductToDelete] = useState<Product | null>(null);
+  const [products, setProducts] = useState<Product[]>([]);
+  const [loading, setLoading] = useState(true);
 
-  const handleLogout = () => {
-    logout();
-    navigate("/login");
-  };
+  useEffect(() => {
+    const q = query(collection(db, "products"), orderBy("name"));
+    const unsubscribe = onSnapshot(q, (snapshot) => {
+      const productsData = snapshot.docs.map(doc => ({
+        id: doc.id,
+        ...doc.data()
+      })) as Product[];
+      setProducts(productsData);
+      setLoading(false);
+    });
 
-  // Données de démonstration
-  const [products, setProducts] = useState<Product[]>([
-    { id: 1, name: "T-Shirt Classique Premium", category: "Vêtements", price: 15000, stock: 45, image: "", description: "T-shirt en coton de qualité supérieure" },
-    { id: 2, name: "Jean Slim Fit Denim", category: "Vêtements", price: 35000, stock: 30, image: "", description: "Jean stretch confortable" },
-    { id: 3, name: "Veste en Cuir Véritable", category: "Vêtements", price: 75000, stock: 12, image: "", description: "Veste en cuir premium" },
-    { id: 4, name: "Sneakers Sport Premium", category: "Chaussures", price: 45000, stock: 25, image: "", description: "Chaussures de sport confortables" },
-    { id: 5, name: "Montre Classique Élégante", category: "Accessoires", price: 55000, stock: 18, image: "", description: "Montre élégante" },
-  ]);
+    return () => unsubscribe();
+  }, []);
 
-  const categories = ["Tous", "Vêtements", "Chaussures", "Accessoires"];
+  // Categories
+  const categories = ["Tous", "Vêtements", "Chaussures", "Accessoires", "Couture"];
 
   const filteredProducts = products.filter(product => {
     const matchesSearch = product.name.toLowerCase().includes(searchTerm.toLowerCase());
@@ -66,94 +62,21 @@ const Products: FC = () => {
     setShowDeleteModal(true);
   };
 
-  const handleDeleteConfirm = () => {
+  const confirmDelete = async () => {
     if (productToDelete) {
-      setProducts(products.filter(p => p.id !== productToDelete.id));
-      setShowDeleteModal(false);
-      setProductToDelete(null);
+      try {
+        await deleteDoc(doc(db, "products", productToDelete.id));
+        setShowDeleteModal(false);
+        setProductToDelete(null);
+      } catch (error) {
+        console.error("Error deleting product:", error);
+      }
     }
   };
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      {/* Header */}
-      <header className="bg-white border-b border-gray-200 sticky top-0 z-10">
-        <div className="px-6 py-4">
-          <div className="flex items-center justify-between">
-            <div>
-              <h1 className="text-2xl font-bold text-gray-900">HAR DESIGN</h1>
-              <p className="text-sm text-gray-600">Dashboard Administrateur</p>
-            </div>
-            <div className="flex items-center gap-4">
-              <div className="text-right">
-                <p className="text-sm font-medium text-gray-900">
-                  {user?.firstName} {user?.lastName}
-                </p>
-                <p className="text-xs text-gray-500">{user?.role}</p>
-              </div>
-              <button
-                onClick={handleLogout}
-                className="p-2 text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-lg transition-colors"
-                aria-label="Déconnexion"
-              >
-                <FiLogOut className="w-5 h-5" />
-              </button>
-            </div>
-          </div>
-        </div>
-      </header>
+    <AdminLayout>
 
-      <div className="flex">
-        {/* Sidebar */}
-        <aside className="w-64 bg-white border-r border-gray-200 min-h-[calc(100vh-73px)]">
-          <nav className="p-4 space-y-1">
-            <Link
-              to="/admin"
-              className="flex items-center gap-3 px-4 py-3 text-gray-600 hover:bg-gray-50 rounded-lg transition-colors"
-            >
-              <FiTrendingUp className="w-5 h-5" />
-              <span>Tableau de bord</span>
-            </Link>
-            <Link
-              to="/admin/products"
-              className="flex items-center gap-3 px-4 py-3 text-gray-900 bg-gray-100 rounded-lg font-medium"
-            >
-              <FiPackage className="w-5 h-5" />
-              <span>Produits</span>
-            </Link>
-            <Link
-              to="/admin/orders"
-              className="flex items-center gap-3 px-4 py-3 text-gray-600 hover:bg-gray-50 rounded-lg transition-colors"
-            >
-              <FiShoppingBag className="w-5 h-5" />
-              <span>Commandes</span>
-            </Link>
-            <Link
-              to="/admin/customers"
-              className="flex items-center gap-3 px-4 py-3 text-gray-600 hover:bg-gray-50 rounded-lg transition-colors"
-            >
-              <FiUsers className="w-5 h-5" />
-              <span>Clients</span>
-            </Link>
-            <Link
-              to="/admin/measurements"
-              className="flex items-center gap-3 px-4 py-3 text-gray-600 hover:bg-gray-50 rounded-lg transition-colors"
-            >
-              <FiSettings className="w-5 h-5" />
-              <span>Mesures Couture</span>
-            </Link>
-            <Link
-              to="/admin/cash"
-              className="flex items-center gap-3 px-4 py-3 text-gray-600 hover:bg-gray-50 rounded-lg transition-colors"
-            >
-              <FiDollarSign className="w-5 h-5" />
-              <span>Caisse</span>
-            </Link>
-          </nav>
-        </aside>
-
-        {/* Main Content */}
-        <main className="flex-1 p-6">
           {/* Header Section */}
           <div className="flex items-center justify-between mb-6">
             <div>
@@ -231,7 +154,11 @@ const Products: FC = () => {
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-gray-200">
-                  {filteredProducts.length > 0 ? (
+                  {loading ? (
+                    <tr>
+                      <td colSpan={5} className="py-12 text-center">Chargement...</td>
+                    </tr>
+                  ) : filteredProducts.length > 0 ? (
                     filteredProducts.map((product) => (
                       <tr key={product.id} className="hover:bg-gray-50 transition-colors">
                         <td className="py-4 px-6">
@@ -323,8 +250,7 @@ const Products: FC = () => {
               </p>
             </div>
           </div>
-        </main>
-      </div>
+
 
       {/* Delete Confirmation Modal */}
       {showDeleteModal && productToDelete && (
@@ -352,7 +278,7 @@ const Products: FC = () => {
                   Annuler
                 </button>
                 <button
-                  onClick={handleDeleteConfirm}
+                  onClick={confirmDelete}
                   className="flex-1 px-4 py-3 bg-red-600 text-white rounded-lg font-medium hover:bg-red-700 transition-colors"
                 >
                   Supprimer
@@ -362,7 +288,7 @@ const Products: FC = () => {
           </div>
         </div>
       )}
-    </div>
+    </AdminLayout>
   );
 };
 

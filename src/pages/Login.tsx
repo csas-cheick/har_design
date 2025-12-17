@@ -11,28 +11,31 @@ const Login: FC = () => {
     rememberMe: false,
   });
   const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
   const { login } = useAuth();
   const navigate = useNavigate();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
+    setLoading(true);
     
-    const success = await login(formData.email, formData.password);
-    
-    if (success) {
-      // Vérifier le rôle après connexion
-      const savedUser = localStorage.getItem("user");
-      if (savedUser) {
-        const user = JSON.parse(savedUser);
+    try {
+      const user = await login(formData.email, formData.password);
+      
+      if (user) {
         if (user.role === "admin") {
           navigate("/admin");
         } else {
           navigate("/");
         }
+      } else {
+        setError("Email ou mot de passe incorrect");
       }
-    } else {
-      setError("Email ou mot de passe incorrect");
+    } catch (err) {
+      setError("Une erreur est survenue lors de la connexion");
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -45,37 +48,37 @@ const Login: FC = () => {
   };
 
   return (
-    <div className="min-h-screen flex">
+    <div className="h-screen flex overflow-hidden">
       {/* Left Side - Form */}
-      <div className="w-full lg:w-1/2 flex items-center justify-center p-6 bg-white">
+      <div className="w-full lg:w-1/2 flex items-center justify-center p-6 bg-white h-full overflow-y-auto">
         <div className="w-full max-w-md">
           {/* Back to Home */}
           <Link
             to="/"
-            className="inline-flex items-center gap-2 text-gray-600 hover:text-gray-900 mb-8 transition-colors"
+            className="inline-flex items-center gap-2 text-gray-600 hover:text-gray-900 mb-6 transition-colors"
           >
             <FiArrowLeft className="w-5 h-5" />
             <span>Retour à l'accueil</span>
           </Link>
 
           {/* Logo */}
-          <div className="mb-8">
-            <h1 className="text-3xl font-bold text-gray-900 mb-2">HAR DESIGN</h1>
-            <p className="text-gray-600">Connectez-vous à votre compte</p>
+          <div className="mb-6">
+            <h1 className="text-2xl font-bold text-gray-900 mb-1">HAR DESIGN</h1>
+            <p className="text-gray-600 text-sm">Connectez-vous à votre compte</p>
           </div>
 
           {/* Form */}
-          <form onSubmit={handleSubmit} className="space-y-5">
+          <form onSubmit={handleSubmit} className="space-y-4">
             {/* Error Message */}
             {error && (
-              <div className="bg-red-50 border border-red-200 text-red-800 px-4 py-3 rounded-lg text-sm">
+              <div className="bg-red-50 border border-red-200 text-red-800 px-4 py-2 rounded-lg text-sm">
                 {error}
               </div>
             )}
             
             {/* Email */}
             <div>
-              <label htmlFor="email" className="block text-sm font-medium text-gray-900 mb-2">
+              <label htmlFor="email" className="block text-sm font-medium text-gray-900 mb-1">
                 Email
               </label>
               <div className="relative">
@@ -89,7 +92,7 @@ const Login: FC = () => {
                   value={formData.email}
                   onChange={handleChange}
                   required
-                  className="block w-full pl-10 pr-3 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-black focus:border-transparent"
+                  className="block w-full pl-10 pr-3 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-black focus:border-transparent"
                   placeholder="votre@email.com"
                 />
               </div>
@@ -97,7 +100,7 @@ const Login: FC = () => {
 
             {/* Password */}
             <div>
-              <label htmlFor="password" className="block text-sm font-medium text-gray-900 mb-2">
+              <label htmlFor="password" className="block text-sm font-medium text-gray-900 mb-1">
                 Mot de passe
               </label>
               <div className="relative">
@@ -111,7 +114,7 @@ const Login: FC = () => {
                   value={formData.password}
                   onChange={handleChange}
                   required
-                  className="block w-full pl-10 pr-10 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-black focus:border-transparent"
+                  className="block w-full pl-10 pr-10 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-black focus:border-transparent"
                   placeholder="••••••••"
                 />
                 <button
@@ -148,13 +151,14 @@ const Login: FC = () => {
             {/* Submit Button */}
             <button
               type="submit"
-              className="w-full bg-black text-white py-3 rounded-lg font-semibold hover:bg-gray-800 transition-colors"
+              disabled={loading}
+              className={`w-full bg-black text-white py-2.5 rounded-lg font-semibold hover:bg-gray-800 transition-colors ${loading ? 'opacity-70 cursor-not-allowed' : ''}`}
             >
-              Se connecter
+              {loading ? "Connexion..." : "Se connecter"}
             </button>
 
             {/* Divider */}
-            <div className="relative my-6">
+            <div className="relative my-4">
               <div className="absolute inset-0 flex items-center">
                 <div className="w-full border-t border-gray-300"></div>
               </div>
@@ -167,7 +171,7 @@ const Login: FC = () => {
             <div className="grid grid-cols-2 gap-3">
               <button
                 type="button"
-                className="flex items-center justify-center gap-2 py-3 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
+                className="flex items-center justify-center gap-2 py-2.5 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
               >
                 <svg className="w-5 h-5" viewBox="0 0 24 24">
                   <path
@@ -226,7 +230,7 @@ const Login: FC = () => {
                 <div className="text-gray-400">Produits</div>
               </div>
               <div className="text-center">
-                <div className="text-4xl font-bold mb-2">1000+</div>
+                <div className="text-4xl font-bold mb-2">100+</div>
                 <div className="text-gray-400">Clients</div>
               </div>
               <div className="text-center">

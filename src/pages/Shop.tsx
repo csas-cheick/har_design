@@ -1,23 +1,16 @@
-import { FC, useState } from "react";
+import { FC, useState, useEffect } from "react";
 import { FiShoppingCart, FiX, FiGrid, FiList, FiHeart } from "react-icons/fi";
 import { useCart } from "../context/CartContext";
-import parfum1 from "../assets/produits/parfum1.png";
-import parfum2 from "../assets/produits/parfum2.png";
-import parfum3 from "../assets/produits/parfum3.png";
-import parfum4 from "../assets/produits/parfum4.png";
-import chaussure1 from "../assets/produits/chaussure1.png";
-import chaussure2 from "../assets/produits/chaussure2.png";
-import chaussure3 from "../assets/produits/chaussure3.png";
-import chaussure4 from "../assets/produits/chaussure4.png";
-import couture1 from "../assets/produits/couture1.png";
-import couture2 from "../assets/produits/couture2.png";
+import { db } from "../firebase";
+import { collection, onSnapshot, query, orderBy } from "firebase/firestore";
 
 interface Product {
-  id: number;
+  id: string;
   name: string;
   price: number;
   image: string;
   category: string;
+  isModel?: boolean;
 }
 
 const Shop: FC = () => {
@@ -27,21 +20,49 @@ const Shop: FC = () => {
   const [showFilters, setShowFilters] = useState(false);
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
   const { addToCart } = useCart();
+  const [products, setProducts] = useState<Product[]>([]);
 
-  const products: Product[] = [
-    { id: 1, name: "T-Shirt Classique - Coton Premium Qualité", price: 15000, image: parfum1, category: "Vêtements" },
-    { id: 2, name: "Jean Slim Fit - Denim Stretch Confortable", price: 35000, image: parfum2, category: "Vêtements" },
-    { id: 3, name: "Veste en Cuir Véritable Premium", price: 7000, image: parfum3, category: "Vêtements" },
-    { id: 4, name: "Sneakers Premium Sport Confort", price: 10000, image: parfum4, category: "Chaussures" },
-    { id: 5, name: "Chemise Élégante Business Premium", price: 5000, image: chaussure1, category: "Vêtements" },
-    { id: 6, name: "Montre Classique Élégante", price: 4000, image: chaussure2, category: "Accessoires" },
-    { id: 7, name: "Sac à Dos Urbain Multi-poches Design", price: 2000, image: chaussure3, category: "Accessoires" },
-    { id: 8, name: "Pull Col Roulé Hiver Chaud Doux", price: 4000, image: chaussure4, category: "Vêtements" },
-    { id: 9, name: "Ensemble Sportif Complet 2025", price: 13000, image: couture1, category: "Vêtements" },
-    { id: 10, name: "Accessoire Mode Tendance", price: 1000, image: couture2, category: "Accessoires" },
-  ];
+  useEffect(() => {
+    // Listen to regular products
+    const qProducts = query(collection(db, "products"), orderBy("name"));
+    const unsubscribeProducts = onSnapshot(qProducts, (snapshot) => {
+      const productsData = snapshot.docs.map(doc => ({
+        id: doc.id,
+        ...doc.data(),
+        isModel: false
+      })) as Product[];
+      
+      // We need to merge with current models state, but since we can't easily access it here without another state,
+      // let's use two separate states and merge them.
+      setRegularProducts(productsData);
+    });
 
-  const categories = ["Tous", "Vêtements", "Chaussures", "Accessoires"];
+    // Listen to couture models
+    const qModels = query(collection(db, "couture_models"), orderBy("name"));
+    const unsubscribeModels = onSnapshot(qModels, (snapshot) => {
+      const modelsData = snapshot.docs.map(doc => ({
+        id: doc.id,
+        ...doc.data(),
+        category: "Couture", // Ensure category is set
+        isModel: true
+      })) as Product[];
+      setCoutureModels(modelsData);
+    });
+
+    return () => {
+      unsubscribeProducts();
+      unsubscribeModels();
+    };
+  }, []);
+
+  const [regularProducts, setRegularProducts] = useState<Product[]>([]);
+  const [coutureModels, setCoutureModels] = useState<Product[]>([]);
+
+  useEffect(() => {
+    setProducts([...regularProducts, ...coutureModels]);
+  }, [regularProducts, coutureModels]);
+
+  const categories = ["Tous", "Vêtements", "Chaussures", "Accessoires", "Couture"];
 
   const filteredProducts = products.filter((product) => {
     if (selectedCategory !== "Tous" && product.category !== selectedCategory) {
@@ -180,22 +201,27 @@ const Shop: FC = () => {
                     <img
                       src={product.image}
                       alt={product.name}
-                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                      className={`w-full h-full ${product.isModel ? 'object-contain p-4' : 'object-cover'} group-hover:scale-105 transition-transform duration-500`}
                     />
                     <div className="absolute top-3 right-3 flex flex-col gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
                       <button className="w-10 h-10 bg-white rounded-full shadow-lg flex items-center justify-center hover:bg-black hover:text-white transition-colors">
                         <FiHeart className="w-5 h-5" />
                       </button>
-                      <button 
-                        onClick={() => addToCart(product)}
-                        className="w-10 h-10 bg-white rounded-full shadow-lg flex items-center justify-center hover:bg-black hover:text-white transition-colors"
-                      >
-                        <FiShoppingCart className="w-5 h-5" />
-                      </button>
+                      {!product.isModel && (
+                        <button 
+                          onClick={() => addToCart(product)}
+                          className="w-10 h-10 bg-white rounded-full shadow-lg flex items-center justify-center hover:bg-black hover:text-white transition-colors"
+                        >
+                          <FiShoppingCart className="w-5 h-5" />
+                        </button>
+                      )}
                     </div>
                   </div>
                   <div>
-                    <p className="text-sm text-gray-500 mb-1">{product.category}</p>
+                    <div className="flex justify-between items-start mb-1">
+                      <p className="text-sm text-gray-500">{product.category}</p>
+                      {product.isModel && <span className="text-xs bg-gray-100 px-2 py-1 rounded text-gray-600">Sur mesure</span>}
+                    </div>
                     <h3 className="text-sm md:text-base font-medium text-gray-900 mb-2 line-clamp-2">
                       {product.name}
                     </h3>
@@ -214,12 +240,15 @@ const Shop: FC = () => {
                     <img
                       src={product.image}
                       alt={product.name}
-                      className="w-full h-full object-cover"
+                      className={`w-full h-full ${product.isModel ? 'object-contain p-4' : 'object-cover'}`}
                     />
                   </div>
                   <div className="flex-1 flex flex-col justify-between">
                     <div>
-                      <p className="text-sm text-gray-500 mb-2">{product.category}</p>
+                      <div className="flex justify-between items-start mb-2">
+                        <p className="text-sm text-gray-500">{product.category}</p>
+                        {product.isModel && <span className="text-xs bg-gray-100 px-2 py-1 rounded text-gray-600">Sur mesure</span>}
+                      </div>
                       <h3 className="text-xl font-semibold text-gray-900 mb-3">
                         {product.name}
                       </h3>
@@ -228,13 +257,15 @@ const Shop: FC = () => {
                       </p>
                     </div>
                     <div className="flex gap-3">
-                      <button 
-                        onClick={() => addToCart(product)}
-                        className="flex items-center gap-2 px-6 py-3 bg-black text-white rounded-lg hover:bg-gray-800 transition-colors"
-                      >
-                        <FiShoppingCart className="w-5 h-5" />
-                        Ajouter au panier
-                      </button>
+                      {!product.isModel && (
+                        <button 
+                          onClick={() => addToCart(product)}
+                          className="flex items-center gap-2 px-6 py-3 bg-black text-white rounded-lg hover:bg-gray-800 transition-colors"
+                        >
+                          <FiShoppingCart className="w-5 h-5" />
+                          Ajouter au panier
+                        </button>
+                      )}
                       <button className="p-3 border border-gray-300 rounded-lg hover:border-black transition-colors">
                         <FiHeart className="w-5 h-5" />
                       </button>

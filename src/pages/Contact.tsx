@@ -1,8 +1,42 @@
-import { FC } from "react";
+import { FC, useState } from "react";
 import { FiFacebook, FiInstagram, FiMail, FiPhone, FiMapPin } from "react-icons/fi";
 import { FaWhatsapp, FaTiktok } from "react-icons/fa";
 
 const Contact: FC = () => {
+  const [formData, setFormData] = useState({
+    name: "",
+    email: "",
+    subject: "",
+    message: ""
+  });
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    // Numéro WhatsApp (format international sans +)
+    const phoneNumber = "22780896022";
+    
+    // Construction du message
+    const text = `*Nouveau message de contact*\n\n` +
+      `*Nom:* ${formData.name}\n` +
+      `*Email:* ${formData.email}\n` +
+      `*Sujet:* ${formData.subject}\n\n` +
+      `*Message:*\n${formData.message}`;
+      
+    // Création de l'URL WhatsApp
+    const whatsappUrl = `https://wa.me/${phoneNumber}?text=${encodeURIComponent(text)}`;
+    
+    // Ouverture dans un nouvel onglet
+    window.open(whatsappUrl, '_blank');
+  };
+
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+    setFormData({
+      ...formData,
+      [e.target.id]: e.target.value
+    });
+  };
+
   return (
     <div className="bg-white">
       {/* Hero Section */}
@@ -42,8 +76,8 @@ const Contact: FC = () => {
                   <FiPhone className="w-8 h-8 text-white" />
                 </div>
                 <h3 className="text-xl font-bold text-gray-900 mb-2">Téléphone</h3>
-                <a href="tel:+33123456789" className="text-gray-600 hover:text-black transition-colors">
-                  +33 1 23 45 67 89
+                <a href="tel:+22780896022" className="text-gray-600 hover:text-black transition-colors">
+                  +227 80 89 60 22
                 </a>
               </div>
 
@@ -103,7 +137,7 @@ const Contact: FC = () => {
               </a>
               {/* WhatsApp */}
               <a
-                href="https://wa.me/33123456789"
+                href="https://wa.me/22780896022"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="group flex flex-col items-center justify-center p-8 bg-white rounded-lg shadow-sm hover:shadow-xl transition-all duration-300 hover:-translate-y-1"
@@ -144,7 +178,7 @@ const Contact: FC = () => {
               </p>
             </div>
 
-            <form className="space-y-6">
+            <form onSubmit={handleSubmit} className="space-y-6">
               <div className="grid md:grid-cols-2 gap-6">
                 <div>
                   <label htmlFor="name" className="block text-gray-900 font-medium mb-2">
@@ -153,6 +187,9 @@ const Contact: FC = () => {
                   <input
                     type="text"
                     id="name"
+                    value={formData.name}
+                    onChange={handleChange}
+                    required
                     className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-black"
                     placeholder="Votre nom"
                   />
@@ -164,6 +201,9 @@ const Contact: FC = () => {
                   <input
                     type="email"
                     id="email"
+                    value={formData.email}
+                    onChange={handleChange}
+                    required
                     className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-black"
                     placeholder="votre@email.com"
                   />
@@ -177,6 +217,9 @@ const Contact: FC = () => {
                 <input
                   type="text"
                   id="subject"
+                  value={formData.subject}
+                  onChange={handleChange}
+                  required
                   className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-black"
                   placeholder="Sujet de votre message"
                 />
@@ -189,6 +232,9 @@ const Contact: FC = () => {
                 <textarea
                   id="message"
                   rows={6}
+                  value={formData.message}
+                  onChange={handleChange}
+                  required
                   className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-black"
                   placeholder="Votre message..."
                 ></textarea>
@@ -196,9 +242,10 @@ const Contact: FC = () => {
 
               <button
                 type="submit"
-                className="w-full bg-black text-white px-8 py-4 font-semibold tracking-wider hover:bg-gray-800 transition-colors"
+                className="w-full bg-black text-white px-8 py-4 font-semibold tracking-wider hover:bg-gray-800 transition-colors flex items-center justify-center gap-2"
               >
-                ENVOYER LE MESSAGE
+                <FaWhatsapp className="w-5 h-5" />
+                ENVOYER SUR WHATSAPP
               </button>
             </form>
           </div>

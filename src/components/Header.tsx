@@ -1,13 +1,22 @@
 import { FC, useState } from "react";
-import { Link, useLocation } from "react-router-dom";
-import { FiSearch, FiShoppingCart, FiUser, FiMenu, FiX } from "react-icons/fi";
+import { Link, useLocation, useNavigate } from "react-router-dom";
+import { FiSearch, FiShoppingCart, FiUser, FiMenu, FiX, FiLogOut, FiPackage } from "react-icons/fi";
 import { useCart } from "../context/CartContext";
+import { useAuth } from "../context/AuthContext";
 
 const Header: FC = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const location = useLocation();
+  const navigate = useNavigate();
   const { cartCount } = useCart();
+  const { isAuthenticated, logout } = useAuth();
+
+  const handleLogout = async () => {
+    await logout();
+    navigate("/");
+    setIsMenuOpen(false);
+  };
 
   const navLinks = [
     { name: "Accueil", path: "/" },
@@ -72,19 +81,40 @@ const Header: FC = () => {
 
             {/* User Menu - Desktop */}
             <div className="hidden lg:flex items-center space-x-2">
-              <Link
-                to="/register"
-                className="px-4 py-2 text-sm font-medium text-gray-700 hover:text-gray-900 transition-colors"
-              >
-                S'inscrire
-              </Link>
-              <Link
-                to="/login"
-                className="flex items-center gap-2 px-5 py-2 bg-black text-white text-sm font-medium rounded-lg hover:bg-gray-800 transition-colors"
-              >
-                <FiUser className="w-4 h-4" />
-                Connexion
-              </Link>
+              {isAuthenticated ? (
+                <>
+                  <Link
+                    to="/my-orders"
+                    className="px-4 py-2 text-sm font-medium text-gray-700 hover:text-gray-900 transition-colors flex items-center gap-2"
+                  >
+                    <FiPackage className="w-4 h-4" />
+                    Mes Commandes
+                  </Link>
+                  <button
+                    onClick={handleLogout}
+                    className="flex items-center gap-2 px-5 py-2 bg-gray-100 text-gray-900 text-sm font-medium rounded-lg hover:bg-gray-200 transition-colors"
+                  >
+                    <FiLogOut className="w-4 h-4" />
+                    Déconnexion
+                  </button>
+                </>
+              ) : (
+                <>
+                  <Link
+                    to="/register"
+                    className="px-4 py-2 text-sm font-medium text-gray-700 hover:text-gray-900 transition-colors"
+                  >
+                    S'inscrire
+                  </Link>
+                  <Link
+                    to="/login"
+                    className="flex items-center gap-2 px-5 py-2 bg-black text-white text-sm font-medium rounded-lg hover:bg-gray-800 transition-colors"
+                  >
+                    <FiUser className="w-4 h-4" />
+                    Connexion
+                  </Link>
+                </>
+              )}
             </div>
 
             {/* Mobile Menu Button */}
@@ -139,21 +169,43 @@ const Header: FC = () => {
 
             {/* Mobile Auth Buttons */}
             <div className="space-y-2 pt-4 border-t border-gray-200">
-              <Link
-                to="/register"
-                onClick={() => setIsMenuOpen(false)}
-                className="block w-full text-center py-3 px-4 border border-gray-300 rounded-lg text-base font-medium text-gray-700 hover:bg-gray-50 transition-colors"
-              >
-                S'inscrire
-              </Link>
-              <Link
-                to="/login"
-                onClick={() => setIsMenuOpen(false)}
-                className="flex items-center justify-center gap-2 w-full py-3 px-4 bg-black text-white rounded-lg text-base font-medium hover:bg-gray-800 transition-colors"
-              >
-                <FiUser className="w-5 h-5" />
-                Connexion
-              </Link>
+              {isAuthenticated ? (
+                <>
+                  <Link
+                    to="/my-orders"
+                    onClick={() => setIsMenuOpen(false)}
+                    className="flex items-center justify-center gap-2 w-full py-3 px-4 border border-gray-300 rounded-lg text-base font-medium text-gray-700 hover:bg-gray-50 transition-colors"
+                  >
+                    <FiPackage className="w-5 h-5" />
+                    Mes Commandes
+                  </Link>
+                  <button
+                    onClick={handleLogout}
+                    className="flex items-center justify-center gap-2 w-full py-3 px-4 bg-gray-100 text-gray-900 rounded-lg text-base font-medium hover:bg-gray-200 transition-colors"
+                  >
+                    <FiLogOut className="w-5 h-5" />
+                    Déconnexion
+                  </button>
+                </>
+              ) : (
+                <>
+                  <Link
+                    to="/register"
+                    onClick={() => setIsMenuOpen(false)}
+                    className="block w-full text-center py-3 px-4 border border-gray-300 rounded-lg text-base font-medium text-gray-700 hover:bg-gray-50 transition-colors"
+                  >
+                    S'inscrire
+                  </Link>
+                  <Link
+                    to="/login"
+                    onClick={() => setIsMenuOpen(false)}
+                    className="flex items-center justify-center gap-2 w-full py-3 px-4 bg-black text-white rounded-lg text-base font-medium hover:bg-gray-800 transition-colors"
+                  >
+                    <FiUser className="w-5 h-5" />
+                    Connexion
+                  </Link>
+                </>
+              )}
             </div>
           </div>
         </div>

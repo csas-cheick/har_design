@@ -16,6 +16,7 @@ const Register: FC = () => {
     acceptTerms: false,
   });
   const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
   const { register: registerUser } = useAuth();
   const navigate = useNavigate();
 
@@ -28,18 +29,25 @@ const Register: FC = () => {
       return;
     }
     
-    const success = await registerUser({
-      firstName: formData.firstName,
-      lastName: formData.lastName,
-      email: formData.email,
-      phone: formData.phone,
-      password: formData.password,
-    });
-    
-    if (success) {
-      navigate("/");
-    } else {
-      setError("Une erreur est survenue lors de l'inscription");
+    setLoading(true);
+    try {
+      const success = await registerUser({
+        firstName: formData.firstName,
+        lastName: formData.lastName,
+        email: formData.email,
+        phone: formData.phone,
+        password: formData.password,
+      });
+      
+      if (success) {
+        navigate("/");
+      } else {
+        setError("Une erreur est survenue lors de l'inscription");
+      }
+    } catch (err) {
+      setError("Une erreur est survenue");
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -52,38 +60,38 @@ const Register: FC = () => {
   };
 
   return (
-    <div className="min-h-screen flex">
+    <div className="h-screen flex overflow-hidden">
       {/* Left Side - Form */}
-      <div className="w-full lg:w-1/2 flex items-center justify-center p-6 bg-white overflow-y-auto">
-        <div className="w-full max-w-md py-8">
+      <div className="w-full lg:w-1/2 flex items-center justify-center p-4 bg-white h-full overflow-y-auto">
+        <div className="w-full max-w-md">
           {/* Back to Home */}
           <Link
             to="/"
-            className="inline-flex items-center gap-2 text-gray-600 hover:text-gray-900 mb-8 transition-colors"
+            className="inline-flex items-center gap-2 text-gray-600 hover:text-gray-900 mb-4 transition-colors"
           >
             <FiArrowLeft className="w-5 h-5" />
             <span>Retour à l'accueil</span>
           </Link>
 
           {/* Logo */}
-          <div className="mb-8">
-            <h1 className="text-3xl font-bold text-gray-900 mb-2">HAR DESIGN</h1>
-            <p className="text-gray-600">Créez votre compte</p>
+          <div className="mb-4">
+            <h1 className="text-2xl font-bold text-gray-900 mb-1">HAR DESIGN</h1>
+            <p className="text-gray-600 text-sm">Créez votre compte</p>
           </div>
 
           {/* Form */}
-          <form onSubmit={handleSubmit} className="space-y-4">
+          <form onSubmit={handleSubmit} className="space-y-3">
             {/* Error Message */}
             {error && (
-              <div className="bg-red-50 border border-red-200 text-red-800 px-4 py-3 rounded-lg text-sm">
+              <div className="bg-red-50 border border-red-200 text-red-800 px-4 py-2 rounded-lg text-sm">
                 {error}
               </div>
             )}
             
             {/* Name Fields */}
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-2 gap-3">
               <div>
-                <label htmlFor="firstName" className="block text-sm font-medium text-gray-900 mb-2">
+                <label htmlFor="firstName" className="block text-sm font-medium text-gray-900 mb-1">
                   Prénom
                 </label>
                 <div className="relative">
@@ -97,14 +105,14 @@ const Register: FC = () => {
                     value={formData.firstName}
                     onChange={handleChange}
                     required
-                    className="block w-full pl-10 pr-3 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-black focus:border-transparent"
+                    className="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-black focus:border-transparent"
                     placeholder="Jean"
                   />
                 </div>
               </div>
 
               <div>
-                <label htmlFor="lastName" className="block text-sm font-medium text-gray-900 mb-2">
+                <label htmlFor="lastName" className="block text-sm font-medium text-gray-900 mb-1">
                   Nom
                 </label>
                 <div className="relative">
@@ -118,120 +126,122 @@ const Register: FC = () => {
                     value={formData.lastName}
                     onChange={handleChange}
                     required
-                    className="block w-full pl-10 pr-3 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-black focus:border-transparent"
+                    className="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-black focus:border-transparent"
                     placeholder="Dupont"
                   />
                 </div>
               </div>
             </div>
 
-            {/* Email */}
-            <div>
-              <label htmlFor="email" className="block text-sm font-medium text-gray-900 mb-2">
-                Email
-              </label>
-              <div className="relative">
-                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                  <FiMail className="w-5 h-5 text-gray-400" />
+            {/* Email & Phone Grid */}
+            <div className="grid grid-cols-2 gap-3">
+              <div>
+                <label htmlFor="email" className="block text-sm font-medium text-gray-900 mb-1">
+                  Email
+                </label>
+                <div className="relative">
+                  <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                    <FiMail className="w-5 h-5 text-gray-400" />
+                  </div>
+                  <input
+                    type="email"
+                    id="email"
+                    name="email"
+                    value={formData.email}
+                    onChange={handleChange}
+                    required
+                    className="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-black focus:border-transparent"
+                    placeholder="email@ex.com"
+                  />
                 </div>
-                <input
-                  type="email"
-                  id="email"
-                  name="email"
-                  value={formData.email}
-                  onChange={handleChange}
-                  required
-                  className="block w-full pl-10 pr-3 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-black focus:border-transparent"
-                  placeholder="votre@email.com"
-                />
+              </div>
+
+              <div>
+                <label htmlFor="phone" className="block text-sm font-medium text-gray-900 mb-1">
+                  Téléphone
+                </label>
+                <div className="relative">
+                  <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                    <FiPhone className="w-5 h-5 text-gray-400" />
+                  </div>
+                  <input
+                    type="tel"
+                    id="phone"
+                    name="phone"
+                    value={formData.phone}
+                    onChange={handleChange}
+                    required
+                    className="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-black focus:border-transparent"
+                    placeholder="+227..."
+                  />
+                </div>
               </div>
             </div>
 
-            {/* Phone */}
-            <div>
-              <label htmlFor="phone" className="block text-sm font-medium text-gray-900 mb-2">
-                Téléphone
-              </label>
-              <div className="relative">
-                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                  <FiPhone className="w-5 h-5 text-gray-400" />
+            {/* Password Grid */}
+            <div className="grid grid-cols-2 gap-3">
+              <div>
+                <label htmlFor="password" className="block text-sm font-medium text-gray-900 mb-1">
+                  Mot de passe
+                </label>
+                <div className="relative">
+                  <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                    <FiLock className="w-5 h-5 text-gray-400" />
+                  </div>
+                  <input
+                    type={showPassword ? "text" : "password"}
+                    id="password"
+                    name="password"
+                    value={formData.password}
+                    onChange={handleChange}
+                    required
+                    className="block w-full pl-10 pr-10 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-black focus:border-transparent"
+                    placeholder="••••••••"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword(!showPassword)}
+                    className="absolute inset-y-0 right-0 pr-3 flex items-center"
+                  >
+                    {showPassword ? (
+                      <FiEyeOff className="w-4 h-4 text-gray-400 hover:text-gray-600" />
+                    ) : (
+                      <FiEye className="w-4 h-4 text-gray-400 hover:text-gray-600" />
+                    )}
+                  </button>
                 </div>
-                <input
-                  type="tel"
-                  id="phone"
-                  name="phone"
-                  value={formData.phone}
-                  onChange={handleChange}
-                  required
-                  className="block w-full pl-10 pr-3 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-black focus:border-transparent"
-                  placeholder="+227 XX XX XX XX"
-                />
               </div>
-            </div>
 
-            {/* Password */}
-            <div>
-              <label htmlFor="password" className="block text-sm font-medium text-gray-900 mb-2">
-                Mot de passe
-              </label>
-              <div className="relative">
-                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                  <FiLock className="w-5 h-5 text-gray-400" />
+              <div>
+                <label htmlFor="confirmPassword" className="block text-sm font-medium text-gray-900 mb-1">
+                  Confirmer
+                </label>
+                <div className="relative">
+                  <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                    <FiLock className="w-5 h-5 text-gray-400" />
+                  </div>
+                  <input
+                    type={showConfirmPassword ? "text" : "password"}
+                    id="confirmPassword"
+                    name="confirmPassword"
+                    value={formData.confirmPassword}
+                    onChange={handleChange}
+                    required
+                    className="block w-full pl-10 pr-10 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-black focus:border-transparent"
+                    placeholder="••••••••"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                    className="absolute inset-y-0 right-0 pr-3 flex items-center"
+                  >
+                    {showConfirmPassword ? (
+                      <FiEyeOff className="w-4 h-4 text-gray-400 hover:text-gray-600" />
+                    ) : (
+                      <FiEye className="w-4 h-4 text-gray-400 hover:text-gray-600" />
+                    )}
+                  </button>
                 </div>
-                <input
-                  type={showPassword ? "text" : "password"}
-                  id="password"
-                  name="password"
-                  value={formData.password}
-                  onChange={handleChange}
-                  required
-                  className="block w-full pl-10 pr-10 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-black focus:border-transparent"
-                  placeholder="••••••••"
-                />
-                <button
-                  type="button"
-                  onClick={() => setShowPassword(!showPassword)}
-                  className="absolute inset-y-0 right-0 pr-3 flex items-center"
-                >
-                  {showPassword ? (
-                    <FiEyeOff className="w-5 h-5 text-gray-400 hover:text-gray-600" />
-                  ) : (
-                    <FiEye className="w-5 h-5 text-gray-400 hover:text-gray-600" />
-                  )}
-                </button>
-              </div>
-            </div>
-
-            {/* Confirm Password */}
-            <div>
-              <label htmlFor="confirmPassword" className="block text-sm font-medium text-gray-900 mb-2">
-                Confirmer le mot de passe
-              </label>
-              <div className="relative">
-                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                  <FiLock className="w-5 h-5 text-gray-400" />
-                </div>
-                <input
-                  type={showConfirmPassword ? "text" : "password"}
-                  id="confirmPassword"
-                  name="confirmPassword"
-                  value={formData.confirmPassword}
-                  onChange={handleChange}
-                  required
-                  className="block w-full pl-10 pr-10 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-black focus:border-transparent"
-                  placeholder="••••••••"
-                />
-                <button
-                  type="button"
-                  onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                  className="absolute inset-y-0 right-0 pr-3 flex items-center"
-                >
-                  {showConfirmPassword ? (
-                    <FiEyeOff className="w-5 h-5 text-gray-400 hover:text-gray-600" />
-                  ) : (
-                    <FiEye className="w-5 h-5 text-gray-400 hover:text-gray-600" />
-                  )}
-                </button>
               </div>
             </div>
 
@@ -246,10 +256,10 @@ const Register: FC = () => {
                   required
                   className="w-4 h-4 text-black border-gray-300 rounded focus:ring-black mt-1"
                 />
-                <span className="ml-2 text-sm text-gray-700">
+                <span className="ml-2 text-xs text-gray-700">
                   J'accepte les{" "}
                   <Link to="/terms" className="text-gray-900 font-medium hover:underline">
-                    conditions d'utilisation
+                    conditions
                   </Link>{" "}
                   et la{" "}
                   <Link to="/privacy" className="text-gray-900 font-medium hover:underline">
@@ -262,17 +272,18 @@ const Register: FC = () => {
             {/* Submit Button */}
             <button
               type="submit"
-              className="w-full bg-black text-white py-3 rounded-lg font-semibold hover:bg-gray-800 transition-colors"
+              disabled={loading}
+              className={`w-full bg-black text-white py-2.5 rounded-lg font-semibold hover:bg-gray-800 transition-colors ${loading ? 'opacity-70 cursor-not-allowed' : ''}`}
             >
-              S'inscrire
+              {loading ? "Inscription..." : "S'inscrire"}
             </button>
 
             {/* Divider */}
-            <div className="relative my-4">
+            <div className="relative my-3">
               <div className="absolute inset-0 flex items-center">
                 <div className="w-full border-t border-gray-300"></div>
               </div>
-              <div className="relative flex justify-center text-sm">
+              <div className="relative flex justify-center text-xs">
                 <span className="px-2 bg-white text-gray-500">Ou continuer avec</span>
               </div>
             </div>
@@ -281,7 +292,7 @@ const Register: FC = () => {
             <div className="grid grid-cols-2 gap-3">
               <button
                 type="button"
-                className="flex items-center justify-center gap-2 py-2.5 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
+                className="flex items-center justify-center gap-2 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
               >
                 <svg className="w-5 h-5" viewBox="0 0 24 24">
                   <path
@@ -342,7 +353,7 @@ const Register: FC = () => {
                   </svg>
                 </div>
                 <div>
-                  <h3 className="font-semibold mb-1">Livraison gratuite</h3>
+                  <h3 className="font-semibold mb-1">Livraison possible</h3>
                   <p className="text-gray-400 text-sm">Sur toutes vos commandes</p>
                 </div>
               </div>

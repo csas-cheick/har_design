@@ -1,10 +1,32 @@
-import { FC } from "react";
-import { Link } from "react-router-dom";
+import { FC, useState, useEffect } from "react";
+import { Link, useNavigate } from "react-router-dom";
 import { FiTrash2, FiMinus, FiPlus, FiShoppingBag } from "react-icons/fi";
 import { useCart } from "../context/CartContext";
+import { useAuth } from "../context/AuthContext";
+import { db } from "../firebase";
+import { collection, addDoc } from "firebase/firestore";
 
 const Cart: FC = () => {
-  const { cartItems, updateQuantity, removeFromCart } = useCart();
+  const { cartItems, updateQuantity, removeFromCart, clearCart } = useCart();
+  const { user, isAuthenticated } = useAuth();
+  const navigate = useNavigate();
+  const [loading, setLoading] = useState(false);
+  const [showCheckout, setShowCheckout] = useState(false);
+  const [formData, setFormData] = useState({
+    name: "",
+    phone: "",
+    address: "",
+  });
+
+  useEffect(() => {
+    if (user) {
+      setFormData(prev => ({
+        ...prev,
+        name: `${user.firstName} ${user.lastName}`,
+        phone: user.phone || "",
+      }));
+    }
+  }, [user]);
 
   const formatPrice = (price: number) => {
     return price.toString().replace(/\B(?=(\d{3})+(?!\d))/g, " ");
@@ -16,6 +38,41 @@ const Cart: FC = () => {
   );
   const shipping = cartItems.length > 0 ? 2000 : 0;
   const total = subtotal + shipping;
+
+  const handleCheckout = async (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    if (!isAuthenticated || !user) {
+      navigate("/login");
+      return;
+    }
+
+    setLoading(true);
+
+    try {
+      await addDoc(collection(db, "orders"), {
+        userId: user.id,
+        customerName: formData.name,
+        customerPhone: formData.phone,
+        customerAddress: formData.address,
+        items: cartItems,
+        subtotal,
+        shipping,
+        total,
+        status: "pending",
+        createdAt: new Date().toISOString(),
+      });
+
+      clearCart();
+      alert("Commande passée avec succès !");
+      navigate("/shop");
+    } catch (error) {
+      console.error("Error placing order:", error);
+      alert("Une erreur est survenue lors de la commande");
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
     <div className="bg-white min-h-screen">
@@ -139,8 +196,17 @@ const Cart: FC = () => {
                   </div>
                 </div>
 
-                <button className="w-full bg-black text-white py-4 rounded-lg font-semibold hover:bg-gray-800 transition-colors mb-4">
-                  Passer la commande
+                <button 
+                  onClick={() => {
+                    if (!isAuthenticated) {
+                      navigate("/login");
+                    } else {
+                      setShowCheckout(true);
+                    }
+                  }}
+                  className="w-full bg-black text-white py-4 rounded-lg font-semibold hover:bg-gray-800 transition-colors mb-4"
+                >
+                  {isAuthenticated ? "Passer la commande" : "Se connecter pour commander"}
                 </button>
 
                 <Link
@@ -174,6 +240,73 @@ const Cart: FC = () => {
           </div>
         )}
       </div>
+
+      {/* Checkout Modal */}
+      {showCheckout && (
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+          <div className="bg-white rounded-xl shadow-2xl w-full max-w-md">
+            <div className="p-6">
+              <h3 className="text-xl font-bold text-gray-900 mb-4">Finaliser la commande</h3>
+              <form onSubmit={handleCheckout} className="space-y-4">
+                {/* Si l'utilisateur est connecté, on affiche ses infos en lecture seule ou pré-remplies */}
+                <div>
+                  <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-1">Nom complet</label>
+                  <input
+                    id="name"
+                    type="text"
+                    required
+                    value={formData.name}
+                    onChange={(e) => setFormData({...formData, name: e.target.value})}
+                    className={`w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-black ${user ? 'bg-gray-100' : ''}`}
+                    readOnly={!!user}
+                  />
+                </div>
+                <div>
+                  <label htmlFor="phone" className="block text-sm font-medium text-gray-700 mb-1">Téléphone</label>
+                  <input
+                    id="phone"
+                    type="tel"
+                    required
+                    value={formData.phone}
+                    onChange={(e) => setFormData({...formData, phone: e.target.value})}
+                    className={`w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-black ${user ? 'bg-gray-100' : ''}`}
+                    readOnly={!!user}
+                  />
+                </div>
+                <div>
+                  <label htmlFor="address" className="block text-sm font-medium text-gray-700 mb-1">Adresse de livraison</label>
+                  <textarea
+                    id="address"
+                    required
+                    value={formData.address}
+                    onChange={(e) => setFormData({...formData, address: e.target.value})}
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-black"
+                    rows={3}
+                    placeholder="Quartier, Ville, Indications..."
+                    autoFocus
+                  />
+                </div>
+                <div className="flex gap-3 mt-6">
+                  <button
+                    type="button"
+                    onClick={() => setShowCheckout(false)}
+                    className="flex-1 px-4 py-3 border border-gray-300 rounded-lg font-medium hover:bg-gray-50 transition-colors"
+                  >
+                    Annuler
+                  </button>
+                  <button
+                    type="submit"
+                    disabled={loading}
+                    className="flex-1 px-4 py-3 bg-black text-white rounded-lg font-medium hover:bg-gray-800 transition-colors disabled:opacity-50"
+                  >
+                    {loading ? "Envoi..." : "Commander"}
+                  </button>
+                </div>
+              </form>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

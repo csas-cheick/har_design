@@ -1,22 +1,65 @@
-import { FC, useState } from "react";
+import { FC, useState, useEffect } from "react";
 import { FiFacebook, FiInstagram, FiShoppingCart } from "react-icons/fi";
 import { FaTiktok, FaWhatsapp } from "react-icons/fa";
 import { Link } from "react-router-dom";
 import heroImage from "./assets/hero1.png";
-import parfum1 from "./assets/produits/parfum1.png";
-import parfum2 from "./assets/produits/parfum2.png";
-import parfum3 from "./assets/produits/parfum3.png";
-import parfum4 from "./assets/produits/parfum4.png";
-import chaussure1 from "./assets/produits/chaussure1.png";
-import chaussure2 from "./assets/produits/chaussure2.png";
-import chaussure3 from "./assets/produits/chaussure3.png";
-import chaussure4 from "./assets/produits/chaussure4.png";
-import couture1 from "./assets/produits/couture1.png";
-import couture2 from "./assets/produits/couture2.png";
+import { db } from "./firebase";
+import { collection, onSnapshot, query, limit, orderBy } from "firebase/firestore";
+
+interface Product {
+  id: string;
+  name: string;
+  price: number;
+  image: string;
+  category: string;
+  isModel?: boolean;
+}
 
 const Accueil: FC = () => {
   const [selectedCategory, setSelectedCategory] = useState("Tous");
   const [priceRange, setPriceRange] = useState("all");
+  const [regularProducts, setRegularProducts] = useState<Product[]>([]);
+  const [coutureModels, setCoutureModels] = useState<Product[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const qProducts = query(collection(db, "products"), orderBy("createdAt", "desc"), limit(10));
+    const unsubscribeProducts = onSnapshot(qProducts, (snapshot) => {
+      const data = snapshot.docs.map(doc => ({
+        id: doc.id,
+        ...doc.data(),
+        isModel: false
+      })) as Product[];
+      setRegularProducts(data);
+      setLoading(false);
+    });
+
+    const qModels = query(collection(db, "couture_models"), limit(5));
+    const unsubscribeModels = onSnapshot(qModels, (snapshot) => {
+      const data = snapshot.docs.map(doc => ({
+        id: doc.id,
+        ...doc.data(),
+        category: "Couture", // Force category
+        isModel: true
+      })) as Product[];
+      setCoutureModels(data);
+    });
+
+    return () => {
+      unsubscribeProducts();
+      unsubscribeModels();
+    };
+  }, []);
+
+  const products = [...regularProducts, ...coutureModels];
+
+  const filteredProducts = products.filter((product) => {
+    if (selectedCategory !== "Tous" && product.category !== selectedCategory) {
+      return false;
+    }
+    // Add price filtering logic if needed
+    return true;
+  });
 
   return (
     <div className="bg-gray-50">
@@ -172,225 +215,37 @@ const Accueil: FC = () => {
 
           {/* Products Grid */}
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-3">
-            {/* Product 1 */}
-            <div className="bg-white rounded-lg overflow-hidden hover:shadow-lg transition-shadow duration-300 cursor-pointer border border-gray-100">
-              <div className="relative aspect-square bg-gray-50">
-                <img 
-                  src={parfum1} 
-                  alt="T-Shirt Classique" 
-                  className="w-full h-full object-cover"
-                />
-                <button className="absolute top-2 right-2 w-8 h-8 bg-white rounded-full shadow-md flex items-center justify-center hover:bg-gray-50 transition-colors">
-                  <FiShoppingCart className="w-4 h-4 text-gray-700" />
-                </button>
-              </div>
-              <div className="p-2.5">
-                <p className="text-xs text-gray-800 mb-2 line-clamp-2 min-h-[32px]">
-                  T-Shirt Classique - Coton Premium Qualité
-                </p>
-                <div className="flex items-baseline gap-1.5">
-                  <span className="text-red-600 text-base font-bold">15 000 FCFA</span>
+            {loading ? (
+              <div className="col-span-full text-center py-10">Chargement...</div>
+            ) : filteredProducts.length === 0 ? (
+              <div className="col-span-full text-center py-10">Aucun produit trouvé</div>
+            ) : (
+              filteredProducts.map((product) => (
+                <div key={product.id} className="bg-white rounded-lg overflow-hidden hover:shadow-lg transition-shadow duration-300 cursor-pointer border border-gray-100">
+                  <div className="relative aspect-square bg-gray-50">
+                    <img 
+                      src={product.image} 
+                      alt={product.name} 
+                      className={`w-full h-full ${product.isModel ? 'object-contain p-4' : 'object-cover'}`}
+                    />
+                    {!product.isModel && (
+                      <button className="absolute top-2 right-2 w-8 h-8 bg-white rounded-full shadow-md flex items-center justify-center hover:bg-gray-50 transition-colors">
+                        <FiShoppingCart className="w-4 h-4 text-gray-700" />
+                      </button>
+                    )}
+                  </div>
+                  <div className="p-2.5">
+                    <p className="text-xs text-gray-800 mb-2 line-clamp-2 min-h-[32px]">
+                      {product.name}
+                    </p>
+                    <div className="flex items-baseline gap-1.5">
+                      <span className="text-red-600 text-base font-bold">{product.price.toLocaleString()} FCFA</span>
+                      {product.isModel && <span className="text-xs text-gray-500 ml-auto">Sur mesure</span>}
+                    </div>
+                  </div>
                 </div>
-              </div>
-            </div>
-
-            {/* Product 2 */}
-            <div className="bg-white rounded-lg overflow-hidden hover:shadow-lg transition-shadow duration-300 cursor-pointer border border-gray-100">
-              <div className="relative aspect-square bg-gray-50">
-                <img 
-                  src={parfum2} 
-                  alt="Jean Slim Fit" 
-                  className="w-full h-full object-cover"
-                />
-                <button className="absolute top-2 right-2 w-8 h-8 bg-white rounded-full shadow-md flex items-center justify-center hover:bg-gray-50 transition-colors">
-                  <FiShoppingCart className="w-4 h-4 text-gray-700" />
-                </button>
-              </div>
-              <div className="p-2.5">
-                <p className="text-xs text-gray-800 mb-2 line-clamp-2 min-h-[32px]">
-                  Jean Slim Fit - Denim Stretch Confortable
-                </p>
-                <div className="flex items-baseline gap-1.5">
-                  <span className="text-red-600 text-base font-bold">35 000 FCFA</span>
-                </div>
-              </div>
-            </div>
-
-            {/* Product 3 */}
-            <div className="bg-white rounded-lg overflow-hidden hover:shadow-lg transition-shadow duration-300 cursor-pointer border border-gray-100">
-              <div className="relative aspect-square bg-gray-50">
-                <img 
-                  src={parfum3} 
-                  alt="Veste en Cuir" 
-                  className="w-full h-full object-cover"
-                />
-                <button className="absolute top-2 right-2 w-8 h-8 bg-white rounded-full shadow-md flex items-center justify-center hover:bg-gray-50 transition-colors">
-                  <FiShoppingCart className="w-4 h-4 text-gray-700" />
-                </button>
-              </div>
-              <div className="p-2.5">
-                <p className="text-xs text-gray-800 mb-2 line-clamp-2 min-h-[32px]">
-                  Veste en Cuir Véritable Premium
-                </p>
-                <div className="flex items-baseline gap-1.5">
-                  <span className="text-red-600 text-base font-bold">7 000 FCFA</span>
-                </div>
-              </div>
-            </div>
-
-            {/* Product 4 */}
-            <div className="bg-white rounded-lg overflow-hidden hover:shadow-lg transition-shadow duration-300 cursor-pointer border border-gray-100">
-              <div className="relative aspect-square bg-gray-50">
-                <img 
-                  src={parfum4} 
-                  alt="Sneakers Premium" 
-                  className="w-full h-full object-cover"
-                />
-                <button className="absolute top-2 right-2 w-8 h-8 bg-white rounded-full shadow-md flex items-center justify-center hover:bg-gray-50 transition-colors">
-                  <FiShoppingCart className="w-4 h-4 text-gray-700" />
-                </button>
-              </div>
-              <div className="p-2.5">
-                <p className="text-xs text-gray-800 mb-2 line-clamp-2 min-h-[32px]">
-                  Sneakers Premium Sport Confort
-                </p>
-                <div className="flex items-baseline gap-1.5">
-                  <span className="text-red-600 text-base font-bold">10 000 FCFA</span>
-                </div>
-              </div>
-            </div>
-
-            {/* Product 5 */}
-            <div className="bg-white rounded-lg overflow-hidden hover:shadow-lg transition-shadow duration-300 cursor-pointer border border-gray-100">
-              <div className="relative aspect-square bg-gray-50">
-                <img 
-                  src={chaussure1} 
-                  alt="Chemise Élégante" 
-                  className="w-full h-full object-cover"
-                />
-                <button className="absolute top-2 right-2 w-8 h-8 bg-white rounded-full shadow-md flex items-center justify-center hover:bg-gray-50 transition-colors">
-                  <FiShoppingCart className="w-4 h-4 text-gray-700" />
-                </button>
-              </div>
-              <div className="p-2.5">
-                <p className="text-xs text-gray-800 mb-2 line-clamp-2 min-h-[32px]">
-                  Chemise Élégante Business Premium
-                </p>
-                <div className="flex items-baseline gap-1.5">
-                  <span className="text-red-600 text-base font-bold">5 000 FCFA</span>
-                </div>
-              </div>
-            </div>
-
-            {/* Product 6 */}
-            <div className="bg-white rounded-lg overflow-hidden hover:shadow-lg transition-shadow duration-300 cursor-pointer border border-gray-100">
-              <div className="relative aspect-square bg-gray-50">
-                <img 
-                  src={chaussure2} 
-                  alt="Montre classique" 
-                  className="w-full h-full object-cover"
-                />
-                <button className="absolute top-2 right-2 w-8 h-8 bg-white rounded-full shadow-md flex items-center justify-center hover:bg-gray-50 transition-colors">
-                  <FiShoppingCart className="w-4 h-4 text-gray-700" />
-                </button>
-              </div>
-              <div className="p-2.5">
-                <p className="text-xs text-gray-800 mb-2 line-clamp-2 min-h-[32px]">
-                  ساعة كلاسيكية مربعة كهربائية الساعة وباج...
-                </p>
-                <div className="flex items-baseline gap-1.5">
-                  <span className="text-red-600 text-base font-bold">4 000 FCFA</span>
-                </div>
-              </div>
-            </div>
-
-            {/* Product 7 */}
-            <div className="bg-white rounded-lg overflow-hidden hover:shadow-lg transition-shadow duration-300 cursor-pointer border border-gray-100">
-              <div className="relative aspect-square bg-gray-50">
-                <img 
-                  src={chaussure3} 
-                  alt="Sac à Dos" 
-                  className="w-full h-full object-cover"
-                />
-                <button className="absolute top-2 right-2 w-8 h-8 bg-white rounded-full shadow-md flex items-center justify-center hover:bg-gray-50 transition-colors">
-                  <FiShoppingCart className="w-4 h-4 text-gray-700" />
-                </button>
-              </div>
-              <div className="p-2.5">
-                <p className="text-xs text-gray-800 mb-2 line-clamp-2 min-h-[32px]">
-                  Sac à Dos Urbain Multi-poches Design
-                </p>
-                <div className="flex items-baseline gap-1.5">
-                  <span className="text-red-600 text-base font-bold">2 000 FCFA</span>
-                </div>
-              </div>
-            </div>
-
-            {/* Product 8 */}
-            <div className="bg-white rounded-lg overflow-hidden hover:shadow-lg transition-shadow duration-300 cursor-pointer border border-gray-100">
-              <div className="relative aspect-square bg-gray-50">
-                <img 
-                  src={chaussure4} 
-                  alt="Pull Col Roulé" 
-                  className="w-full h-full object-cover"
-                />
-                <button className="absolute top-2 right-2 w-8 h-8 bg-white rounded-full shadow-md flex items-center justify-center hover:bg-gray-50 transition-colors">
-                  <FiShoppingCart className="w-4 h-4 text-gray-700" />
-                </button>
-              </div>
-              <div className="p-2.5">
-                <p className="text-xs text-gray-800 mb-2 line-clamp-2 min-h-[32px]">
-                  Pull Col Roulé Hiver Chaud Doux
-                </p>
-                <div className="flex items-baseline gap-1.5">
-                  <span className="text-red-600 text-base font-bold">4 000 FCFA</span>
-                </div>
-              </div>
-            </div>
-
-            {/* Product 9 */}
-            <div className="bg-white rounded-lg overflow-hidden hover:shadow-lg transition-shadow duration-300 cursor-pointer border border-gray-100">
-              <div className="relative aspect-square bg-gray-50">
-                <img 
-                  src={couture1} 
-                  alt="Ensemble sportif" 
-                  className="w-full h-full object-cover"
-                />
-                <button className="absolute top-2 right-2 w-8 h-8 bg-white rounded-full shadow-md flex items-center justify-center hover:bg-gray-50 transition-colors">
-                  <FiShoppingCart className="w-4 h-4 text-gray-700" />
-                </button>
-              </div>
-              <div className="p-2.5">
-                <p className="text-xs text-gray-800 mb-2 line-clamp-2 min-h-[32px]">
-                  طقم رياضي رجالي جديد يصفحل لعام 2025
-                </p>
-                <div className="flex items-baseline gap-1.5">
-                  <span className="text-red-600 text-base font-bold">13 000 FCFA</span>
-                </div>
-              </div>
-            </div>
-
-            {/* Product 10 */}
-            <div className="bg-white rounded-lg overflow-hidden hover:shadow-lg transition-shadow duration-300 cursor-pointer border border-gray-100">
-              <div className="relative aspect-square bg-gray-50">
-                <img 
-                  src={couture2} 
-                  alt="Produit divers" 
-                  className="w-full h-full object-cover"
-                />
-                <button className="absolute top-2 right-2 w-8 h-8 bg-white rounded-full shadow-md flex items-center justify-center hover:bg-gray-50 transition-colors">
-                  <FiShoppingCart className="w-4 h-4 text-gray-700" />
-                </button>
-              </div>
-              <div className="p-2.5">
-                <p className="text-xs text-gray-800 mb-2 line-clamp-2 min-h-[32px]">
-                  موجة X8 رائن من الجيل الثاني شوائب الرقفف...
-                </p>
-                <div className="flex items-baseline gap-1.5">
-                  <span className="text-red-600 text-base font-bold">1 000 FCFA</span>
-                </div>
-              </div>
-            </div>
+              ))
+            )}
           </div>
 
           {/* View All Button */}
