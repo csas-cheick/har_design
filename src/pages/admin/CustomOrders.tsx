@@ -210,14 +210,14 @@ const CustomOrdersPage: FC = () => {
 
   return (
     <AdminLayout>
-      <div className="flex items-center justify-between mb-6">
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
         <div>
           <h2 className="text-2xl font-bold text-gray-900">Commandes Couture</h2>
           <p className="text-gray-600 mt-1">Gérez les commandes sur mesure</p>
         </div>
         <button
           onClick={() => setShowAddModal(true)}
-          className="flex items-center gap-2 bg-black text-white px-4 py-2 rounded-lg hover:bg-gray-800 transition-colors"
+          className="flex items-center justify-center gap-2 bg-black text-white px-4 py-2.5 rounded-lg hover:bg-gray-800 transition-colors w-full md:w-auto"
         >
           <FiPlus className="w-5 h-5" />
           Nouvelle Commande
@@ -225,7 +225,7 @@ const CustomOrdersPage: FC = () => {
       </div>
 
       {/* Filters */}
-      <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 mb-6">
+      <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-4 md:p-6 mb-6">
         <div className="flex flex-col lg:flex-row gap-4">
           <div className="flex-1">
             <div className="relative">
@@ -234,14 +234,14 @@ const CustomOrdersPage: FC = () => {
               </div>
               <input
                 type="text"
-                placeholder="Rechercher une commande (client, téléphone, modèle)..."
+                placeholder="Rechercher une commande..."
                 value={orderSearchTerm}
                 onChange={(e) => setOrderSearchTerm(e.target.value)}
                 className="block w-full pl-10 pr-3 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-black"
               />
             </div>
           </div>
-          <div className="flex gap-2 overflow-x-auto pb-2 lg:pb-0">
+          <div className="flex gap-2 overflow-x-auto pb-2 lg:pb-0 no-scrollbar">
             {["all", "pending", "in_progress", "completed", "delivered", "cancelled"].map((status) => (
               <button
                 key={status}
@@ -262,7 +262,7 @@ const CustomOrdersPage: FC = () => {
       {/* Orders List */}
       <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
         <div className="overflow-x-auto">
-          <table className="w-full text-left">
+          <table className="w-full text-left min-w-[800px]">
             <thead className="bg-gray-50 border-b border-gray-200">
               <tr>
                 <th className="px-6 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider">Client</th>
@@ -365,8 +365,8 @@ const CustomOrdersPage: FC = () => {
       {/* Order Details Modal */}
       {selectedOrder && (
         <div className="fixed inset-0 backdrop-blur-sm bg-white/30 z-50 flex items-center justify-center p-4" onClick={() => setSelectedOrder(null)}>
-          <div className="bg-white rounded-xl shadow-2xl w-full max-w-2xl" onClick={(e) => e.stopPropagation()}>
-            <div className="p-6 border-b border-gray-200 flex items-center justify-between">
+          <div className="bg-white rounded-xl shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto" onClick={(e) => e.stopPropagation()}>
+            <div className="p-4 md:p-6 border-b border-gray-200 flex items-center justify-between sticky top-0 bg-white z-10">
               <h3 className="text-xl font-bold text-gray-900">Détails de la Commande</h3>
               <button
                 onClick={() => setSelectedOrder(null)}
@@ -375,20 +375,20 @@ const CustomOrdersPage: FC = () => {
                 <FiX className="w-6 h-6" />
               </button>
             </div>
-            <div className="p-6 space-y-6">
-              <div className="flex items-start gap-6">
+            <div className="p-4 md:p-6 space-y-6">
+              <div className="flex flex-col md:flex-row items-start gap-6">
                 {selectedOrder.modelImage && (
-                  <div className="w-32 h-32 bg-gray-100 rounded-lg overflow-hidden flex-shrink-0">
+                  <div className="w-full md:w-32 h-48 md:h-32 bg-gray-100 rounded-lg overflow-hidden flex-shrink-0">
                     <img src={selectedOrder.modelImage} alt={selectedOrder.modelName} className="w-full h-full object-contain" />
                   </div>
                 )}
-                <div className="flex-1">
+                <div className="flex-1 w-full">
                   <h4 className="text-lg font-bold text-gray-900 mb-1">{selectedOrder.modelName}</h4>
                   <div className="flex items-center gap-2 text-gray-600 mb-4">
                     <FiUser className="w-4 h-4" />
                     <span>{selectedOrder.customerName} ({selectedOrder.customerPhone})</span>
                   </div>
-                  <div className="grid grid-cols-2 gap-4">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div className="bg-gray-50 p-3 rounded-lg">
                       <p className="text-xs text-gray-500 mb-1">Prix Total</p>
                       <p className="font-bold text-gray-900">{selectedOrder.price.toLocaleString()} FCFA</p>
@@ -401,7 +401,7 @@ const CustomOrdersPage: FC = () => {
                 </div>
               </div>
 
-              <div className="grid grid-cols-2 gap-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
                   <h5 className="font-medium text-gray-900 mb-2">Détails du Tissu</h5>
                   <p className="text-gray-600 text-sm bg-gray-50 p-3 rounded-lg">
@@ -416,7 +416,7 @@ const CustomOrdersPage: FC = () => {
                 </div>
               </div>
 
-              <div className="flex items-center justify-between pt-4 border-t border-gray-100">
+              <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between pt-4 border-t border-gray-100 gap-4">
                 <div className="flex items-center gap-2 text-gray-600">
                   <FiCalendar className="w-5 h-5" />
                   <span className="font-medium">Livraison prévue :</span>
@@ -435,7 +435,7 @@ const CustomOrdersPage: FC = () => {
       {showAddModal && (
         <div className="fixed inset-0 backdrop-blur-sm bg-white/30 z-50 flex items-center justify-center p-4 overflow-y-auto">
           <div className="bg-white rounded-xl shadow-2xl w-full max-w-4xl my-8 flex flex-col max-h-[90vh]">
-            <div className="p-6 border-b border-gray-200 flex items-center justify-between flex-none">
+            <div className="p-4 md:p-6 border-b border-gray-200 flex items-center justify-between flex-none sticky top-0 bg-white z-10">
               <h3 className="text-xl font-bold text-gray-900">Nouvelle Commande Couture</h3>
               <button
                 onClick={() => setShowAddModal(false)}
@@ -445,7 +445,7 @@ const CustomOrdersPage: FC = () => {
               </button>
             </div>
             
-            <div className="flex-1 overflow-y-auto p-6">
+            <div className="flex-1 overflow-y-auto p-4 md:p-6">
               <form onSubmit={handleSubmit} className="space-y-6">
                 {/* Customer Selection */}
                 <div className="relative">
@@ -525,7 +525,7 @@ const CustomOrdersPage: FC = () => {
                 {/* Model Selection */}
                 <div>
                   <h3 className="text-lg font-bold text-gray-900 mb-4">Choisir le Modèle</h3>
-                  <div className="grid grid-cols-3 md:grid-cols-4 gap-4 max-h-[200px] overflow-y-auto">
+                  <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4 max-h-[200px] overflow-y-auto">
                     {models.map(model => (
                       <div 
                         key={model.id}

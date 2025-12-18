@@ -150,7 +150,7 @@ const Orders: FC = () => {
       </div>
 
           {/* Filters */}
-          <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 mb-6">
+          <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-4 md:p-6 mb-6">
             <div className="flex flex-col lg:flex-row gap-4">
               <div className="flex-1">
                 <div className="relative">
@@ -166,12 +166,12 @@ const Orders: FC = () => {
                   />
                 </div>
               </div>
-              <div className="flex gap-2">
+              <div className="flex gap-2 overflow-x-auto pb-2 lg:pb-0 no-scrollbar">
                 {["all", "pending", "processing", "completed", "cancelled"].map((status) => (
                   <button
                     key={status}
                     onClick={() => setStatusFilter(status)}
-                    className={`px-4 py-2.5 rounded-lg font-medium transition-colors ${
+                    className={`px-4 py-2.5 rounded-lg font-medium transition-colors whitespace-nowrap ${
                       statusFilter === status
                         ? "bg-black text-white"
                         : "bg-gray-100 text-gray-700 hover:bg-gray-200"
@@ -187,7 +187,7 @@ const Orders: FC = () => {
           {/* Orders Table */}
           <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
             <div className="overflow-x-auto">
-              <table className="w-full">
+              <table className="w-full min-w-[800px]">
                 <thead className="bg-gray-50">
                   <tr>
                     <th className="text-left py-4 px-6 text-sm font-semibold text-gray-900">ID Commande</th>
@@ -273,7 +273,7 @@ const Orders: FC = () => {
       {selectedOrder && (
         <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 transition-all" onClick={() => setSelectedOrder(null)}>
           <div className="bg-white rounded-xl shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto transform transition-all" onClick={e => e.stopPropagation()}>
-            <div className="p-6">
+            <div className="p-4 md:p-6">
               <div className="flex items-center justify-between mb-6">
                 <h3 className="text-xl font-bold text-gray-900">Détails de la commande</h3>
                 <button
@@ -284,7 +284,7 @@ const Orders: FC = () => {
                 </button>
               </div>
 
-              <div className="grid md:grid-cols-2 gap-6 mb-8">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
                 <div>
                   <h4 className="font-semibold text-gray-900 mb-2">Informations Client</h4>
                   <p className="text-gray-600"><span className="font-medium">Nom:</span> {selectedOrder.customerName}</p>

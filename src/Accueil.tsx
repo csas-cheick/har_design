@@ -1,7 +1,12 @@
 import { FC, useState, useEffect } from "react";
-import { FiFacebook, FiInstagram, FiShoppingCart } from "react-icons/fi";
+import { FiFacebook, FiInstagram, FiArrowRight, FiScissors, FiAward, FiTruck } from "react-icons/fi";
 import { FaTiktok, FaWhatsapp } from "react-icons/fa";
 import { Link } from "react-router-dom";
+import { motion } from "framer-motion";
+import { Swiper, SwiperSlide } from "swiper/react";
+import { Autoplay, Navigation } from "swiper/modules";
+import "swiper/css";
+import "swiper/css/navigation";
 import heroImage from "./assets/hero1.png";
 import { db } from "./firebase";
 import { collection, onSnapshot, query, limit, orderBy } from "firebase/firestore";
@@ -16,14 +21,13 @@ interface Product {
 }
 
 const Accueil: FC = () => {
-  const [selectedCategory, setSelectedCategory] = useState("Tous");
-  const [priceRange, setPriceRange] = useState("all");
   const [regularProducts, setRegularProducts] = useState<Product[]>([]);
   const [coutureModels, setCoutureModels] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const qProducts = query(collection(db, "products"), orderBy("createdAt", "desc"), limit(10));
+    // Fetch more products for the showcase
+    const qProducts = query(collection(db, "products"), orderBy("createdAt", "desc"), limit(12));
     const unsubscribeProducts = onSnapshot(qProducts, (snapshot) => {
       const data = snapshot.docs.map(doc => ({
         id: doc.id,
@@ -34,12 +38,12 @@ const Accueil: FC = () => {
       setLoading(false);
     });
 
-    const qModels = query(collection(db, "couture_models"), limit(5));
+    const qModels = query(collection(db, "couture_models"), limit(6));
     const unsubscribeModels = onSnapshot(qModels, (snapshot) => {
       const data = snapshot.docs.map(doc => ({
         id: doc.id,
         ...doc.data(),
-        category: "Couture", // Force category
+        category: "Couture",
         isModel: true
       })) as Product[];
       setCoutureModels(data);
@@ -51,211 +55,310 @@ const Accueil: FC = () => {
     };
   }, []);
 
-  const products = [...regularProducts, ...coutureModels];
-
-  const filteredProducts = products.filter((product) => {
-    if (selectedCategory !== "Tous" && product.category !== selectedCategory) {
-      return false;
-    }
-    // Add price filtering logic if needed
-    return true;
-  });
+  // Animation variants
+  const fadeInUp = {
+    hidden: { opacity: 0, y: 20 },
+    visible: { opacity: 1, y: 0, transition: { duration: 0.6 } }
+  };
 
   return (
-    <div className="bg-gray-50">
+    <div className="bg-white overflow-x-hidden">
       {/* Hero Section */}
       <section className="relative bg-gradient-to-br from-gray-900 via-gray-800 to-black text-white min-h-[90vh]">
         <div className="container mx-auto px-6 h-full">
           <div className="grid md:grid-cols-2 gap-12 items-start md:items-center min-h-[90vh] pt-8 md:pt-0">
             {/* Left Content */}
-            <div className="space-y-8 z-10">
+            <motion.div 
+              initial={{ opacity: 0, x: -50 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ duration: 0.8 }}
+              className="space-y-8 z-10"
+            >
               <div className="space-y-4">
                 <p className="text-red-400 uppercase tracking-widest text-sm font-semibold">
                   BIENVENU SUR HAR DESIGN
                 </p>
-                <h1 className="text-3xl md:text-5xl lg:text-6xl font-bold text-white leading-tight">
-                  HAR Design<br />
-                  Niamey - Niger
+                <h1 className="text-4xl md:text-6xl lg:text-7xl font-bold text-white leading-tight">
+                  L'Élégance <br />
+                  <span className="text-transparent bg-clip-text bg-gradient-to-r from-gray-200 to-gray-500">
+                    Redéfinie
+                  </span>
                 </h1>
                 <p className="text-gray-300 text-base md:text-lg max-w-lg leading-relaxed">
-                  Découvrez notre collection exclusive de vêtements et accessoires. 
-                  Des créations soigneusement sélectionnées pour votre style unique.
+                  Une fusion parfaite entre tradition et modernité. Découvrez des créations uniques qui subliment votre style.
                 </p>
               </div>
               
               <Link
                 to="/shop"
-                className="inline-flex items-center bg-white text-black px-6 py-3 md:px-8 md:py-4 text-sm md:text-base font-semibold tracking-wider hover:bg-gray-100 transition-colors group"
+                className="inline-flex items-center bg-white text-black px-8 py-4 text-sm md:text-base font-semibold tracking-wider hover:bg-gray-100 transition-all transform hover:scale-105 group"
               >
-                DÉCOUVRIR
-                <svg className="w-4 h-4 md:w-5 md:h-5 ml-2 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8l4 4m0 0l-4 4m4-4H3" />
-                </svg>
+                EXPLORER LA COLLECTION
+                <FiArrowRight className="ml-2 group-hover:translate-x-1 transition-transform" />
               </Link>
-            </div>
+            </motion.div>
 
             {/* Right Image */}
-            <div className="relative">
-              {/* Decorative Circle */}
-              <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-40 h-40 md:w-80 md:h-80 bg-white opacity-10 rounded-full"></div>
-              
-              {/* Model Image */}
+            <motion.div 
+              initial={{ opacity: 0, scale: 0.8 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ duration: 0.8, delay: 0.2 }}
+              className="relative"
+            >
+              <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-64 h-64 md:w-[500px] md:h-[500px] bg-gradient-to-tr from-gray-800 to-transparent rounded-full opacity-20 blur-3xl"></div>
               <div className="relative z-10 flex justify-center">
                 <img 
                   src={heroImage} 
                   alt="HAR DESIGN Collection" 
-                  className="w-2/3 md:w-full max-w-[240px] md:max-w-sm h-auto object-contain"
+                  className="w-3/4 md:w-full max-w-md h-auto object-contain drop-shadow-2xl"
                 />
               </div>
-            </div>
+            </motion.div>
           </div>
 
           {/* Social Icons */}
-          <div className="absolute left-6 right-6 md:right-auto bottom-6 md:bottom-12 flex justify-between md:justify-start md:space-x-6">
-            <div className="flex space-x-4">
-              <a href="#" className="text-gray-400 hover:text-white transition-colors" aria-label="Facebook">
-                <FiFacebook className="w-5 h-5" />
+          <div className="absolute left-6 bottom-12 flex space-x-6 z-20">
+            {[
+              { icon: FiFacebook, href: "#" },
+              { icon: FaTiktok, href: "#" },
+              { icon: FaWhatsapp, href: "#" },
+              { icon: FiInstagram, href: "#" }
+            ].map((social, index) => (
+              <a 
+                key={index}
+                href={social.href} 
+                className="text-gray-400 hover:text-white transition-colors transform hover:-translate-y-1"
+              >
+                <social.icon className="w-5 h-5" />
               </a>
-              <a href="#" className="text-gray-400 hover:text-white transition-colors" aria-label="Twitter">
-                <FaTiktok className="w-5 h-5" />
-              </a>
-            </div>
-            <div className="flex space-x-4 md:hidden">
-              <a href="#" className="text-gray-400 hover:text-white transition-colors" aria-label="Pinterest">
-                <FaWhatsapp className="w-5 h-5" />
-              </a>
-              <a href="#" className="text-gray-400 hover:text-white transition-colors" aria-label="Instagram">
-                <FiInstagram className="w-5 h-5" />
-              </a>
-            </div>
-            <a href="#" className="hidden md:block text-gray-400 hover:text-white transition-colors" aria-label="Pinterest">
-              <FaWhatsapp className="w-5 h-5" />
-            </a>
-            <a href="#" className="hidden md:block text-gray-400 hover:text-white transition-colors" aria-label="Instagram">
-              <FiInstagram className="w-5 h-5" />
-            </a>
+            ))}
           </div>
         </div>
       </section>
 
-      {/* Products Section */}
-      <section className="py-20 bg-white">
+      {/* Marquee Section */}
+      <div className="bg-black text-white py-6 overflow-hidden border-t border-gray-800">
+        <motion.div 
+          animate={{ x: ["0%", "-50%"] }}
+          transition={{ repeat: Infinity, duration: 20, ease: "linear" }}
+          className="flex whitespace-nowrap"
+        >
+          {[...Array(4)].map((_, i) => (
+            <span key={i} className="text-xl md:text-2xl font-light tracking-[0.2em] mx-8">
+              HAR DESIGN • NOUVELLE COLLECTION • ÉLÉGANCE • NIAMEY • LUXE • 
+            </span>
+          ))}
+        </motion.div>
+      </div>
+
+      {/* Editorial Section - L'Art du Détail */}
+      <section className="py-24 bg-white">
         <div className="container mx-auto px-6">
-          {/* Section Header */}
-          <div className="text-center mb-16">
-            <h2 className="text-2xl md:text-4xl lg:text-5xl font-bold text-gray-900 mb-4">
-              Nos Produits
-            </h2>
-            <p className="text-base md:text-lg lg:text-xl text-gray-600 max-w-2xl mx-auto">
-              Découvrez notre sélection de vêtements tendance pour tous les styles
-            </p>
-          </div>
-
-          {/* Filters Section */}
-          <div className="bg-gray-50 rounded-lg p-6 mb-12">
-            <div className="grid md:grid-cols-3 gap-6">
-              {/* Category Filter */}
-              <div>
-                <label className="block text-sm font-semibold text-gray-900 mb-3">
-                  Catégorie
-                </label>
-                <div className="flex flex-wrap gap-2">
-                  {["Tous", "Vêtements", "Chaussures", "Accessoires"].map((cat) => (
-                    <button
-                      key={cat}
-                      onClick={() => setSelectedCategory(cat)}
-                      className={`px-4 py-2 rounded-full text-sm font-medium transition-colors ${
-                        selectedCategory === cat
-                          ? "bg-black text-white"
-                          : "bg-white text-gray-700 hover:bg-gray-200"
-                      }`}
-                    >
-                      {cat}
-                    </button>
-                  ))}
-                </div>
-              </div>
-
-              {/* Price Range Filter */}
-              <div>
-                <label htmlFor="price-range" className="block text-sm font-semibold text-gray-900 mb-3">
-                  Gamme de prix
-                </label>
-                <select
-                  id="price-range"
-                  value={priceRange}
-                  onChange={(e) => setPriceRange(e.target.value)}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-black bg-white"
-                >
-                  <option value="all">Tous les prix</option>
-                  <option value="0-20000">0 - 20,000 FCFA</option>
-                  <option value="20000-50000">20,000 - 50,000 FCFA</option>
-                  <option value="50000-100000">50,000 - 100,000 FCFA</option>
-                  <option value="100000+">100,000+ FCFA</option>
-                </select>
-              </div>
-
-              {/* Sort By */}
-              <div>
-                <label htmlFor="sort-by" className="block text-sm font-semibold text-gray-900 mb-3">
-                  Trier par
-                </label>
-                <select
-                  id="sort-by"
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-black bg-white"
-                >
-                  <option value="newest">Plus récent</option>
-                  <option value="price-asc">Prix croissant</option>
-                  <option value="price-desc">Prix décroissant</option>
-                  <option value="popular">Plus populaire</option>
-                </select>
-              </div>
-            </div>
-          </div>
-
-          {/* Products Grid */}
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-3">
-            {loading ? (
-              <div className="col-span-full text-center py-10">Chargement...</div>
-            ) : filteredProducts.length === 0 ? (
-              <div className="col-span-full text-center py-10">Aucun produit trouvé</div>
-            ) : (
-              filteredProducts.map((product) => (
-                <div key={product.id} className="bg-white rounded-lg overflow-hidden hover:shadow-lg transition-shadow duration-300 cursor-pointer border border-gray-100">
-                  <div className="relative aspect-square bg-gray-50">
-                    <img 
-                      src={product.image} 
-                      alt={product.name} 
-                      className={`w-full h-full ${product.isModel ? 'object-contain p-4' : 'object-cover'}`}
-                    />
-                    {!product.isModel && (
-                      <button className="absolute top-2 right-2 w-8 h-8 bg-white rounded-full shadow-md flex items-center justify-center hover:bg-gray-50 transition-colors">
-                        <FiShoppingCart className="w-4 h-4 text-gray-700" />
-                      </button>
-                    )}
+          <div className="flex flex-col md:flex-row items-center gap-16">
+            <motion.div 
+              initial={{ opacity: 0, x: -30 }}
+              whileInView={{ opacity: 1, x: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.8 }}
+              className="md:w-1/2"
+            >
+              <span className="text-sm font-bold tracking-widest text-gray-400 uppercase mb-4 block">Notre Philosophie</span>
+              <h2 className="text-4xl md:text-6xl font-serif font-medium mb-8 leading-tight text-gray-900">
+                L'Art du <br/>
+                <span className="italic font-light">Détail</span>
+              </h2>
+              <p className="text-gray-600 text-lg leading-relaxed mb-8 font-light">
+                Chaque pièce raconte une histoire. Nos créations sur mesure sont le fruit d'un savoir-faire artisanal d'exception, alliant traditions nigériennes et design contemporain. Nous ne créons pas seulement des vêtements, nous sculptons votre élégance.
+              </p>
+              <Link 
+                to="/shop" 
+                className="inline-block border-b border-black pb-1 text-black hover:text-gray-600 hover:border-gray-600 transition-all tracking-widest text-sm"
+              >
+                DÉCOUVRIR L'ATELIER
+              </Link>
+            </motion.div>
+            
+            <motion.div 
+              initial={{ opacity: 0, scale: 0.95 }}
+              whileInView={{ opacity: 1, scale: 1 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.8 }}
+              className="md:w-1/2 relative h-[600px] w-full"
+            >
+              <div className="absolute inset-0 bg-gray-100">
+                {coutureModels.length > 0 ? (
+                  <img 
+                    src={coutureModels[0].image} 
+                    alt="Couture Model" 
+                    className="w-full h-full object-cover grayscale hover:grayscale-0 transition-all duration-1000 ease-out"
+                  />
+                ) : (
+                  <div className="w-full h-full flex items-center justify-center text-gray-300">
+                    Chargement...
                   </div>
-                  <div className="p-2.5">
-                    <p className="text-xs text-gray-800 mb-2 line-clamp-2 min-h-[32px]">
-                      {product.name}
-                    </p>
-                    <div className="flex items-baseline gap-1.5">
-                      <span className="text-red-600 text-base font-bold">{product.price.toLocaleString()} FCFA</span>
-                      {product.isModel && <span className="text-xs text-gray-500 ml-auto">Sur mesure</span>}
+                )}
+              </div>
+              {/* Floating Badge */}
+              <div className="absolute -bottom-6 -left-6 bg-white p-6 shadow-xl max-w-xs hidden md:block">
+                <p className="font-serif text-xl italic text-gray-900">"L'élégance est la seule beauté qui ne se fane jamais."</p>
+              </div>
+            </motion.div>
+          </div>
+        </div>
+      </section>
+
+      {/* Minimalist Product Grid - Sélection Exclusive */}
+      <section className="py-24 bg-gray-50">
+        <div className="container mx-auto px-6">
+          <div className="flex flex-col items-center mb-16">
+            <h3 className="text-2xl font-light uppercase tracking-[0.3em] text-center mb-4">Sélection Exclusive</h3>
+            <div className="w-12 h-0.5 bg-black"></div>
+          </div>
+          
+          {loading ? (
+            <div className="flex justify-center py-20">
+              <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-black"></div>
+            </div>
+          ) : (
+            <Swiper
+              modules={[Autoplay, Navigation]}
+              spaceBetween={30}
+              slidesPerView={1}
+              loop={true}
+              speed={1000}
+              autoplay={{
+                delay: 3000,
+                disableOnInteraction: false,
+              }}
+              breakpoints={{
+                640: { slidesPerView: 2 },
+                1024: { slidesPerView: 3 },
+              }}
+              className="w-full !pb-12"
+            >
+              {regularProducts.map((product) => (
+                <SwiperSlide key={product.id}>
+                  <div className="group cursor-pointer">
+                    <div className="relative overflow-hidden aspect-[3/4] mb-6 bg-gray-200">
+                      <img 
+                        src={product.image} 
+                        alt={product.name} 
+                        className="w-full h-full object-cover transition-transform duration-1000 ease-out group-hover:scale-110"
+                      />
+                      <div className="absolute inset-0 bg-black/10 group-hover:bg-black/20 transition-colors duration-500"></div>
+                      
+                      {/* Hover Button */}
+                      <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-500">
+                        <Link 
+                          to="/shop"
+                          className="bg-white text-black px-8 py-3 text-xs font-bold tracking-widest hover:bg-black hover:text-white transition-colors transform translate-y-4 group-hover:translate-y-0 duration-500"
+                        >
+                          VOIR LE PRODUIT
+                        </Link>
+                      </div>
+                    </div>
+                    
+                    <div className="text-center space-y-2">
+                      <h4 className="text-lg font-medium text-gray-900 group-hover:text-gray-600 transition-colors">
+                        {product.name}
+                      </h4>
+                      <p className="text-gray-500 font-light tracking-wide">
+                        {product.price.toLocaleString()} FCFA
+                      </p>
                     </div>
                   </div>
-                </div>
-              ))
+                </SwiperSlide>
+              ))}
+            </Swiper>
+          )}
+          
+          <div className="text-center mt-16">
+            <Link 
+              to="/shop" 
+              className="inline-block border border-black px-10 py-4 text-sm font-bold tracking-widest hover:bg-black hover:text-white transition-all duration-300"
+            >
+              TOUTE LA COLLECTION
+            </Link>
+          </div>
+        </div>
+      </section>
+
+      {/* Categories / Large Visuals */}
+      <section className="grid md:grid-cols-2 h-[70vh] min-h-[500px]">
+        <div className="relative group overflow-hidden">
+          <div className="absolute inset-0 bg-gray-900">
+            {coutureModels[1] && (
+              <img 
+                src={coutureModels[1].image} 
+                className="w-full h-full object-cover opacity-70 group-hover:opacity-60 group-hover:scale-105 transition-all duration-1000" 
+                alt="Sur Mesure"
+              />
             )}
           </div>
-
-          {/* View All Button */}
-          <div className="text-center mt-16">
-            <Link
-              to="/shop"
-              className="inline-block bg-black text-white px-8 py-3 md:px-10 md:py-4 text-sm md:text-base font-semibold tracking-wider hover:bg-gray-800 transition-colors"
-            >
-              VOIR TOUS LES PRODUITS
+          <div className="absolute inset-0 flex flex-col items-center justify-center text-white p-8 text-center">
+            <h3 className="text-3xl md:text-5xl font-serif italic mb-4 transform translate-y-0 group-hover:-translate-y-2 transition-transform duration-500">Sur Mesure</h3>
+            <p className="max-w-md text-gray-200 mb-8 opacity-0 group-hover:opacity-100 transform translate-y-4 group-hover:translate-y-0 transition-all duration-500 delay-100">
+              Des créations uniques adaptées à votre morphologie et à vos envies.
+            </p>
+            <Link to="/shop" className="border-b border-white pb-1 tracking-widest text-sm hover:text-gray-300 hover:border-gray-300 transition-colors">
+              EXPLORER
             </Link>
+          </div>
+        </div>
+        
+        <div className="relative group overflow-hidden">
+          <div className="absolute inset-0 bg-gray-800">
+            {regularProducts[3] && (
+              <img 
+                src={regularProducts[3].image} 
+                className="w-full h-full object-cover opacity-70 group-hover:opacity-60 group-hover:scale-105 transition-all duration-1000" 
+                alt="Prêt-à-porter"
+              />
+            )}
+          </div>
+          <div className="absolute inset-0 flex flex-col items-center justify-center text-white p-8 text-center">
+            <h3 className="text-3xl md:text-5xl font-serif italic mb-4 transform translate-y-0 group-hover:-translate-y-2 transition-transform duration-500">Prêt-à-porter</h3>
+            <p className="max-w-md text-gray-200 mb-8 opacity-0 group-hover:opacity-100 transform translate-y-4 group-hover:translate-y-0 transition-all duration-500 delay-100">
+              Une collection tendance disponible immédiatement pour votre style quotidien.
+            </p>
+            <Link to="/shop" className="border-b border-white pb-1 tracking-widest text-sm hover:text-gray-300 hover:border-gray-300 transition-colors">
+              DÉCOUVRIR
+            </Link>
+          </div>
+        </div>
+      </section>
+
+      {/* Services / Brand Promise */}
+      <section className="py-24 bg-white border-t border-gray-100">
+        <div className="container mx-auto px-6">
+          <div className="grid md:grid-cols-3 gap-12 text-center">
+            <div className="space-y-4">
+              <div className="w-16 h-16 bg-gray-50 rounded-full flex items-center justify-center mx-auto mb-6">
+                <FiScissors className="w-6 h-6 text-black" />
+              </div>
+              <h3 className="text-lg font-bold uppercase tracking-widest">Sur Mesure</h3>
+              <p className="text-gray-500 font-light leading-relaxed max-w-xs mx-auto">
+                Une coupe parfaite adaptée à votre silhouette. Chaque vêtement est ajusté avec précision.
+              </p>
+            </div>
+            <div className="space-y-4">
+              <div className="w-16 h-16 bg-gray-50 rounded-full flex items-center justify-center mx-auto mb-6">
+                <FiAward className="w-6 h-6 text-black" />
+              </div>
+              <h3 className="text-lg font-bold uppercase tracking-widest">Qualité Premium</h3>
+              <p className="text-gray-500 font-light leading-relaxed max-w-xs mx-auto">
+                Des tissus d'exception sélectionnés avec soin pour leur durabilité et leur élégance.
+              </p>
+            </div>
+            <div className="space-y-4">
+              <div className="w-16 h-16 bg-gray-50 rounded-full flex items-center justify-center mx-auto mb-6">
+                <FiTruck className="w-6 h-6 text-black" />
+              </div>
+              <h3 className="text-lg font-bold uppercase tracking-widest">Livraison Rapide</h3>
+              <p className="text-gray-500 font-light leading-relaxed max-w-xs mx-auto">
+                Expédition soignée partout au Niger et à l'international.
+              </p>
+            </div>
           </div>
         </div>
       </section>

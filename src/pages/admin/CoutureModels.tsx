@@ -161,36 +161,36 @@ const CoutureModels: FC = () => {
         </div>
       </div>
 
-      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
+      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-2 md:gap-4">
             {filteredModels.map((model) => (
               <div key={model.id} className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden group">
-                <div className="relative h-48 bg-gray-100">
+                <div className="relative h-32 md:h-48 bg-gray-100">
                   {model.image ? (
                     <img src={model.image} alt={model.name} className="w-full h-full object-contain p-2" />
                   ) : (
                     <div className="w-full h-full flex items-center justify-center text-gray-400">
-                      <FiScissors className="w-12 h-12" />
+                      <FiScissors className="w-8 h-8 md:w-12 md:h-12" />
                     </div>
                   )}
                   <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2">
                     <button
                       onClick={() => handleEdit(model)}
-                      className="p-2 bg-white text-gray-900 rounded-full hover:bg-gray-100"
+                      className="p-1.5 md:p-2 bg-white text-gray-900 rounded-full hover:bg-gray-100"
                     >
-                      <FiEdit className="w-5 h-5" />
+                      <FiEdit className="w-4 h-4 md:w-5 md:h-5" />
                     </button>
                     <button
                       onClick={() => handleDelete(model.id)}
-                      className="p-2 bg-red-600 text-white rounded-full hover:bg-red-700"
+                      className="p-1.5 md:p-2 bg-red-600 text-white rounded-full hover:bg-red-700"
                     >
-                      <FiTrash2 className="w-5 h-5" />
+                      <FiTrash2 className="w-4 h-4 md:w-5 md:h-5" />
                     </button>
                   </div>
                 </div>
-                <div className="p-4">
-                  <h3 className="font-bold text-gray-900">{model.name}</h3>
-                  <p className="text-sm text-gray-500 mt-1 line-clamp-2">{model.description}</p>
-                  <p className="text-lg font-bold text-gray-900 mt-2">{model.price.toLocaleString()} FCFA</p>
+                <div className="p-2 md:p-4">
+                  <h3 className="font-bold text-sm md:text-base text-gray-900 truncate">{model.name}</h3>
+                  <p className="text-xs md:text-sm text-gray-500 mt-1 line-clamp-2">{model.description}</p>
+                  <p className="text-sm md:text-lg font-bold text-gray-900 mt-2">{model.price.toLocaleString()} FCFA</p>
                 </div>
               </div>
             ))}

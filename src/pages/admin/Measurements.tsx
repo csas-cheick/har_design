@@ -105,7 +105,7 @@ const MeasurementsPage: FC = () => {
 
   return (
     <AdminLayout>
-      <div className="flex items-center justify-between mb-6">
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
         <div>
           <h2 className="text-2xl font-bold text-gray-900">Mesures Couture</h2>
           <p className="text-gray-600 mt-1">Gérez les mesures de vos clients</p>
@@ -114,7 +114,7 @@ const MeasurementsPage: FC = () => {
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
             {/* Customer List */}
-            <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 h-[calc(100vh-200px)] flex flex-col">
+            <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-4 md:p-6 h-[400px] lg:h-[calc(100vh-200px)] flex flex-col">
               <div className="relative mb-4">
                 <FiSearch className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
                 <input
@@ -155,8 +155,8 @@ const MeasurementsPage: FC = () => {
             {/* Measurements Form */}
             <div className="lg:col-span-2">
               {selectedCustomer ? (
-                <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-                  <div className="flex items-center justify-between mb-6">
+                <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-4 md:p-6">
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
                     <h3 className="text-xl font-bold text-gray-900 flex items-center gap-2">
                       <TbRuler className="w-6 h-6" />
                       Mesures de {selectedCustomer.firstName}
@@ -164,7 +164,7 @@ const MeasurementsPage: FC = () => {
                     <button
                       onClick={handleSave}
                       disabled={saving}
-                      className="flex items-center gap-2 bg-black text-white px-6 py-2 rounded-lg hover:bg-gray-800 transition-colors disabled:opacity-50"
+                      className="flex items-center justify-center gap-2 bg-black text-white px-6 py-2 rounded-lg hover:bg-gray-800 transition-colors disabled:opacity-50 w-full sm:w-auto"
                     >
                       <FiSave className="w-5 h-5" />
                       {saving ? "Enregistrement..." : "Enregistrer"}
@@ -176,7 +176,7 @@ const MeasurementsPage: FC = () => {
                       <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-black"></div>
                     </div>
                   ) : (
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 md:gap-6">
                       {Object.keys(defaultMeasurements).map((key) => (
                         <div key={key}>
                           <label className="block text-sm font-medium text-gray-700 mb-1 capitalize">

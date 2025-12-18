@@ -106,33 +106,33 @@ const Dashboard: FC = () => {
   return (
     <AdminLayout>
       {/* Stats Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+      <div className="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6 mb-8">
         {statCards.map((stat, index) => (
               <div
                 key={index}
-                className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 hover:shadow-md transition-shadow"
+                className="bg-white rounded-xl shadow-sm border border-gray-200 p-4 md:p-6 hover:shadow-md transition-shadow"
               >
                 <div className="flex items-center justify-between mb-4">
-                  <div className={`${stat.color} p-3 rounded-lg`}>
-                    <stat.icon className="w-6 h-6 text-white" />
+                  <div className={`${stat.color} p-2 md:p-3 rounded-lg`}>
+                    <stat.icon className="w-5 h-5 md:w-6 md:h-6 text-white" />
                   </div>
-                  <span className="text-xs font-medium text-gray-500 flex items-center gap-1">
+                  <span className="text-[10px] md:text-xs font-medium text-gray-500 flex items-center gap-1">
                     {stat.trend}
                   </span>
                 </div>
-                <h3 className="text-2xl font-bold text-gray-900 mb-1">
+                <h3 className="text-xl md:text-2xl font-bold text-gray-900 mb-1 truncate">
                   {loading ? "..." : stat.value}
                 </h3>
-                <p className="text-sm text-gray-600">{stat.label}</p>
+                <p className="text-xs md:text-sm text-gray-600 truncate">{stat.label}</p>
               </div>
             ))}
           </div>
 
           {/* Quick Actions */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6 mb-8">
             <Link
               to="/admin/custom-orders"
-              className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 hover:shadow-md transition-shadow group"
+              className="bg-white rounded-xl shadow-sm border border-gray-200 p-4 md:p-6 hover:shadow-md transition-shadow group"
             >
               <div className="flex items-center gap-4">
                 <div className="bg-pink-100 p-3 rounded-lg group-hover:bg-pink-200 transition-colors">
@@ -147,7 +147,7 @@ const Dashboard: FC = () => {
 
             <Link
               to="/admin/orders"
-              className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 hover:shadow-md transition-shadow group"
+              className="bg-white rounded-xl shadow-sm border border-gray-200 p-4 md:p-6 hover:shadow-md transition-shadow group"
             >
               <div className="flex items-center gap-4">
                 <div className="bg-green-100 p-3 rounded-lg group-hover:bg-green-200 transition-colors">
@@ -162,7 +162,7 @@ const Dashboard: FC = () => {
 
             <Link
               to="/admin/customers"
-              className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 hover:shadow-md transition-shadow group"
+              className="bg-white rounded-xl shadow-sm border border-gray-200 p-4 md:p-6 hover:shadow-md transition-shadow group"
             >
               <div className="flex items-center gap-4">
                 <div className="bg-orange-100 p-3 rounded-lg group-hover:bg-orange-200 transition-colors">

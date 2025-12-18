@@ -104,10 +104,10 @@ const Cart: FC = () => {
               {cartItems.map((item) => (
                 <div
                   key={item.id}
-                  className="flex gap-6 p-6 border border-gray-200 rounded-lg hover:shadow-md transition-shadow"
+                  className="flex flex-col sm:flex-row gap-4 md:gap-6 p-4 md:p-6 border border-gray-200 rounded-lg hover:shadow-md transition-shadow"
                 >
                   {/* Product Image */}
-                  <div className="w-32 h-32 bg-gray-50 rounded-lg overflow-hidden flex-shrink-0">
+                  <div className="w-full sm:w-32 h-48 sm:h-32 bg-gray-50 rounded-lg overflow-hidden flex-shrink-0">
                     <img
                       src={item.image}
                       alt={item.name}
@@ -118,19 +118,19 @@ const Cart: FC = () => {
                   {/* Product Info */}
                   <div className="flex-1 flex flex-col justify-between">
                     <div>
-                      <p className="text-sm text-gray-500 mb-1">
+                      <p className="text-xs md:text-sm text-gray-500 mb-1">
                         {item.category}
                       </p>
-                      <h3 className="text-lg font-semibold text-gray-900 mb-2">
+                      <h3 className="text-base md:text-lg font-semibold text-gray-900 mb-1 md:mb-2">
                         {item.name}
                       </h3>
-                      <p className="text-xl font-bold text-gray-900">
+                      <p className="text-lg md:text-xl font-bold text-gray-900">
                         {formatPrice(item.price)} FCFA
                       </p>
                     </div>
 
                     {/* Quantity Controls */}
-                    <div className="flex items-center gap-4 mt-4">
+                    <div className="flex items-center justify-between sm:justify-start gap-4 mt-4">
                       <div className="flex items-center border border-gray-300 rounded-lg">
                         <button
                           onClick={() =>
@@ -141,7 +141,7 @@ const Cart: FC = () => {
                         >
                           <FiMinus className="w-4 h-4" />
                         </button>
-                        <span className="px-6 py-2 font-medium">
+                        <span className="px-4 md:px-6 py-2 font-medium text-sm md:text-base">
                           {item.quantity}
                         </span>
                         <button

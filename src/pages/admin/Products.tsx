@@ -78,14 +78,14 @@ const Products: FC = () => {
     <AdminLayout>
 
           {/* Header Section */}
-          <div className="flex items-center justify-between mb-6">
+          <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
             <div>
               <h2 className="text-2xl font-bold text-gray-900">Produits</h2>
               <p className="text-gray-600 mt-1">Gérez votre catalogue de produits</p>
             </div>
             <Link
               to="/admin/products/new"
-              className="flex items-center gap-2 bg-black text-white px-6 py-3 rounded-lg font-semibold hover:bg-gray-800 transition-colors"
+              className="flex items-center justify-center gap-2 bg-black text-white px-6 py-3 rounded-lg font-semibold hover:bg-gray-800 transition-colors w-full md:w-auto"
             >
               <FiPlus className="w-5 h-5" />
               Ajouter un produit
@@ -93,7 +93,7 @@ const Products: FC = () => {
           </div>
 
           {/* Filters and Search */}
-          <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 mb-6">
+          <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-4 md:p-6 mb-6">
             <div className="flex flex-col lg:flex-row gap-4">
               {/* Search */}
               <div className="flex-1">
@@ -112,12 +112,12 @@ const Products: FC = () => {
               </div>
 
               {/* Category Filter */}
-              <div className="flex gap-2 flex-wrap">
+              <div className="flex gap-2 overflow-x-auto pb-2 lg:pb-0 no-scrollbar">
                 {categories.map((cat) => (
                   <button
                     key={cat}
                     onClick={() => setSelectedCategory(cat)}
-                    className={`px-4 py-2.5 rounded-lg font-medium transition-colors ${
+                    className={`px-4 py-2.5 rounded-lg font-medium transition-colors whitespace-nowrap ${
                       selectedCategory === cat
                         ? "bg-black text-white"
                         : "bg-gray-100 text-gray-700 hover:bg-gray-200"
@@ -133,7 +133,7 @@ const Products: FC = () => {
           {/* Products Table */}
           <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
             <div className="overflow-x-auto">
-              <table className="w-full">
+              <table className="w-full min-w-[800px]">
                 <thead className="bg-gray-50">
                   <tr>
                     <th className="text-left py-4 px-6 text-sm font-semibold text-gray-900">
@@ -232,20 +232,20 @@ const Products: FC = () => {
           </div>
 
           {/* Stats */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-6">
-            <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-              <p className="text-gray-600 text-sm mb-1">Total Produits</p>
-              <p className="text-3xl font-bold text-gray-900">{products.length}</p>
+          <div className="grid grid-cols-2 md:grid-cols-3 gap-4 md:gap-6 mt-6">
+            <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-4 md:p-6">
+              <p className="text-gray-600 text-xs md:text-sm mb-1">Total Produits</p>
+              <p className="text-xl md:text-3xl font-bold text-gray-900">{products.length}</p>
             </div>
-            <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-              <p className="text-gray-600 text-sm mb-1">Valeur Stock</p>
-              <p className="text-3xl font-bold text-gray-900">
+            <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-4 md:p-6">
+              <p className="text-gray-600 text-xs md:text-sm mb-1">Valeur Stock</p>
+              <p className="text-xl md:text-3xl font-bold text-gray-900 truncate">
                 {formatPrice(products.reduce((sum, p) => sum + p.price * p.stock, 0))} FCFA
               </p>
             </div>
-            <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-              <p className="text-gray-600 text-sm mb-1">Stock Total</p>
-              <p className="text-3xl font-bold text-gray-900">
+            <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-4 md:p-6 col-span-2 md:col-span-1">
+              <p className="text-gray-600 text-xs md:text-sm mb-1">Stock Total</p>
+              <p className="text-xl md:text-3xl font-bold text-gray-900">
                 {products.reduce((sum, p) => sum + p.stock, 0)} unités
               </p>
             </div>

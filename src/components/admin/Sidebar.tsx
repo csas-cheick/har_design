@@ -17,7 +17,11 @@ interface MenuItem {
   children?: { path: string; label: string; icon?: ElementType }[];
 }
 
-const Sidebar: FC = () => {
+interface SidebarProps {
+  onClose?: () => void;
+}
+
+const Sidebar: FC<SidebarProps> = ({ onClose }) => {
   const location = useLocation();
   const currentPath = location.pathname;
   const [expandedMenus, setExpandedMenus] = useState<string[]>(["Catalogue", "Ventes", "Clients"]);
@@ -99,6 +103,7 @@ const Sidebar: FC = () => {
                       <Link
                         key={child.path}
                         to={child.path}
+                        onClick={onClose}
                         className={`block px-4 py-2 rounded-lg text-sm transition-colors ${
                           isActive(child.path)
                             ? "text-black font-medium bg-gray-100"
@@ -118,6 +123,7 @@ const Sidebar: FC = () => {
             <Link
               key={item.path}
               to={item.path!}
+              onClick={onClose}
               className={`flex items-center gap-3 px-4 py-3 rounded-lg transition-colors ${
                 isActive(item.path!, item.exact)
                   ? "text-gray-900 bg-gray-100 font-medium"

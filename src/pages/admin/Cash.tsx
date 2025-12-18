@@ -94,18 +94,19 @@ const Cash: FC = () => {
   return (
     <AdminLayout>
       {/* Header Section */}
-      <div className="flex items-center justify-between mb-6 print:hidden">
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6 print:hidden">
         <div>
           <h2 className="text-2xl font-bold text-gray-900">Gestion de la Caisse</h2>
           <p className="text-gray-600 mt-1">Suivez les mouvements de caisse journaliers</p>
         </div>
-        <div className="flex gap-3">
+        <div className="flex flex-wrap gap-3">
           <button
             onClick={handlePrint}
-            className="flex items-center gap-2 bg-white border border-gray-300 text-gray-700 px-4 py-2.5 rounded-lg font-medium hover:bg-gray-50 transition-colors"
+            className="flex items-center justify-center bg-white border border-gray-300 text-gray-700 p-2.5 rounded-lg hover:bg-gray-50 transition-colors"
+            aria-label="Imprimer"
+            title="Imprimer"
           >
             <FiPrinter className="w-5 h-5" />
-            Imprimer
           </button>
           <button
                 onClick={() => {
@@ -239,28 +240,28 @@ const Cash: FC = () => {
               <div className="border-b-2 border-black print:mb-3"></div>
             </div>
 
-            <div className="p-6 border-b border-gray-200 print:hidden">
+            <div className="p-4 md:p-6 border-b border-gray-200 print:hidden">
               <h3 className="text-lg font-bold text-gray-900">Transactions du jour</h3>
             </div>
             <div className="overflow-x-auto">
-              <table className="w-full print:text-sm">
+              <table className="w-full min-w-[600px] print:text-sm">
                 <thead className="bg-gray-50 print:bg-gray-100">
                   <tr>
-                    <th className="text-left py-3 px-6 text-sm font-semibold text-gray-900 print:py-2 print:px-3">Heure</th>
-                    <th className="text-left py-3 px-6 text-sm font-semibold text-gray-900 print:py-2 print:px-3">Type</th>
-                    <th className="text-left py-3 px-6 text-sm font-semibold text-gray-900 print:py-2 print:px-3">Description</th>
-                    <th className="text-left py-3 px-6 text-sm font-semibold text-gray-900 print:py-2 print:px-3">Paiement</th>
-                    <th className="text-right py-3 px-6 text-sm font-semibold text-gray-900 print:py-2 print:px-3">Montant</th>
+                    <th className="text-left py-3 px-4 md:px-6 text-sm font-semibold text-gray-900 print:py-2 print:px-3">Heure</th>
+                    <th className="text-left py-3 px-4 md:px-6 text-sm font-semibold text-gray-900 print:py-2 print:px-3">Type</th>
+                    <th className="text-left py-3 px-4 md:px-6 text-sm font-semibold text-gray-900 print:py-2 print:px-3">Description</th>
+                    <th className="text-left py-3 px-4 md:px-6 text-sm font-semibold text-gray-900 print:py-2 print:px-3">Paiement</th>
+                    <th className="text-right py-3 px-4 md:px-6 text-sm font-semibold text-gray-900 print:py-2 print:px-3">Montant</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-gray-200">
                   {todayTransactions.length > 0 ? (
                     todayTransactions.map((transaction) => (
                       <tr key={transaction.id} className="hover:bg-gray-50 transition-colors print:hover:bg-transparent">
-                        <td className="py-4 px-6 text-sm text-gray-600 print:py-1.5 print:px-3">
+                        <td className="py-4 px-4 md:px-6 text-sm text-gray-600 print:py-1.5 print:px-3">
                           {formatTime(transaction.timestamp)}
                         </td>
-                        <td className="py-4 px-6 print:py-1.5 print:px-3">
+                        <td className="py-4 px-4 md:px-6 print:py-1.5 print:px-3">
                           <span
                             className={`inline-flex items-center gap-1 px-3 py-1 text-sm font-medium rounded-full print:px-2 print:py-0.5 print:text-xs ${
                               transaction.type === "vente"
@@ -280,15 +281,15 @@ const Cash: FC = () => {
                             {transaction.type === "vente" ? "Vente" : transaction.type === "entree" ? "Entrée" : "Sortie"}
                           </span>
                         </td>
-                        <td className="py-4 px-6 text-sm text-gray-900 print:py-1.5 print:px-3">
+                        <td className="py-4 px-4 md:px-6 text-sm text-gray-900 print:py-1.5 print:px-3">
                           {transaction.description}
                         </td>
-                        <td className="py-4 px-6 print:py-1.5 print:px-3">
+                        <td className="py-4 px-4 md:px-6 print:py-1.5 print:px-3">
                           <span className="text-sm text-gray-600 capitalize print:text-xs">
                             {transaction.paymentMethod === "especes" ? "Espèces" : transaction.paymentMethod === "mobile" ? "Mobile Money" : "Carte"}
                           </span>
                         </td>
-                        <td className="py-4 px-6 text-right print:py-1.5 print:px-3">
+                        <td className="py-4 px-4 md:px-6 text-right print:py-1.5 print:px-3">
                           <span
                             className={`font-semibold print:text-sm ${
                               transaction.type === "sortie" ? "text-red-600" : "text-green-600"

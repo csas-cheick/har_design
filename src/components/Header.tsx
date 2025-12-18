@@ -32,9 +32,13 @@ const Header: FC = () => {
       <nav className="container mx-auto px-6">
         <div className="flex items-center justify-between h-20">
           {/* Logo */}
-          <Link to="/" className="flex items-center space-x-2">
-            <div className="text-2xl md:text-3xl font-bold text-gray-900 tracking-tight">
-              HAR DESIGN
+          <Link to="/" className="flex items-center gap-3 group">
+            <div className="w-10 h-10 bg-black text-white flex items-center justify-center font-serif font-bold text-xl">
+              H
+            </div>
+            <div className="flex flex-col">
+              <span className="text-lg font-serif font-bold tracking-widest leading-none text-black">HAR</span>
+              <span className="text-[10px] font-medium tracking-[0.3em] text-gray-500 group-hover:text-black transition-colors leading-none mt-1">DESIGN</span>
             </div>
           </Link>
 

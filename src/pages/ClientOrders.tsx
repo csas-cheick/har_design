@@ -114,38 +114,38 @@ const ClientOrders: FC = () => {
             </Link>
           </div>
         ) : (
-          <div className="space-y-6">
+          <div className="space-y-4 md:space-y-6">
             {orders.map((order) => (
               <div key={order.id} className="bg-white rounded-xl shadow-sm overflow-hidden border border-gray-200">
-                <div className="p-6 border-b border-gray-100 bg-gray-50 flex flex-wrap items-center justify-between gap-4">
-                  <div className="flex items-center gap-4">
+                <div className="p-4 md:p-6 border-b border-gray-100 bg-gray-50 flex flex-wrap items-center justify-between gap-4">
+                  <div className="flex items-center gap-3 md:gap-4">
                     <div className="p-2 bg-white rounded-lg border border-gray-200">
-                      <FiPackage className="w-6 h-6 text-gray-600" />
+                      <FiPackage className="w-5 h-5 md:w-6 md:h-6 text-gray-600" />
                     </div>
                     <div>
-                      <p className="text-sm text-gray-500">Commande #{order.id.slice(0, 8)}</p>
-                      <p className="text-sm font-medium text-gray-900">{formatDate(order.createdAt)}</p>
+                      <p className="text-xs md:text-sm text-gray-500">Commande #{order.id.slice(0, 8)}</p>
+                      <p className="text-xs md:text-sm font-medium text-gray-900">{formatDate(order.createdAt)}</p>
                     </div>
                   </div>
-                  <div className="flex items-center gap-4">
-                    <span className={`px-3 py-1 rounded-full text-sm font-medium ${getStatusColor(order.status)}`}>
+                  <div className="flex items-center gap-3 md:gap-4">
+                    <span className={`px-2 py-1 md:px-3 md:py-1 rounded-full text-xs md:text-sm font-medium ${getStatusColor(order.status)}`}>
                       {getStatusLabel(order.status)}
                     </span>
-                    <p className="text-lg font-bold text-gray-900">{formatPrice(order.total)} FCFA</p>
+                    <p className="text-base md:text-lg font-bold text-gray-900">{formatPrice(order.total)} FCFA</p>
                   </div>
                 </div>
-                <div className="p-6">
+                <div className="p-4 md:p-6">
                   <div className="space-y-4">
                     {order.items.map((item, index) => (
-                      <div key={index} className="flex items-center gap-4">
-                        <div className="w-16 h-16 bg-gray-100 rounded-lg overflow-hidden flex-shrink-0">
+                      <div key={index} className="flex items-center gap-3 md:gap-4">
+                        <div className="w-12 h-12 md:w-16 md:h-16 bg-gray-100 rounded-lg overflow-hidden flex-shrink-0">
                           <img src={item.image} alt={item.name} className="w-full h-full object-cover" />
                         </div>
                         <div className="flex-1">
-                          <h4 className="font-medium text-gray-900">{item.name}</h4>
-                          <p className="text-sm text-gray-500">Quantité: {item.quantity}</p>
+                          <h4 className="text-sm md:text-base font-medium text-gray-900">{item.name}</h4>
+                          <p className="text-xs md:text-sm text-gray-500">Quantité: {item.quantity}</p>
                         </div>
-                        <p className="font-medium text-gray-900">{formatPrice(item.price * item.quantity)} FCFA</p>
+                        <p className="text-sm md:text-base font-medium text-gray-900">{formatPrice(item.price * item.quantity)} FCFA</p>
                       </div>
                     ))}
                   </div>
