@@ -14,6 +14,7 @@ import { collection, onSnapshot, query, where, orderBy } from "firebase/firestor
 const Dashboard: FC = () => {
   const [boutiqueOrders, setBoutiqueOrders] = useState<any[]>([]);
   const [customOrders, setCustomOrders] = useState<any[]>([]);
+  const [transactions, setTransactions] = useState<any[]>([]);
   const [productsCount, setProductsCount] = useState(0);
   const [customersCount, setCustomersCount] = useState(0);
   const [loading, setLoading] = useState(true);
@@ -31,12 +32,18 @@ const Dashboard: FC = () => {
       setCustomOrders(snapshot.docs.map(doc => ({ id: doc.id, type: 'couture', ...doc.data() })));
     });
 
-    // 3. Fetch Products Count
+    // 3. Fetch Transactions (Cash)
+    const qTransactions = query(collection(db, "transactions"));
+    const unsubTransactions = onSnapshot(qTransactions, (snapshot) => {
+      setTransactions(snapshot.docs.map(doc => doc.data()));
+    });
+
+    // 4. Fetch Products Count
     const unsubProducts = onSnapshot(collection(db, "products"), (snapshot) => {
       setProductsCount(snapshot.size);
     });
 
-    // 4. Fetch Customers Count
+    // 5. Fetch Customers Count
     const qUsers = query(collection(db, "users"), where("role", "==", "user"));
     const unsubUsers = onSnapshot(qUsers, (snapshot) => {
       setCustomersCount(snapshot.size);
@@ -45,18 +52,18 @@ const Dashboard: FC = () => {
     return () => {
       unsubOrders();
       unsubCustomOrders();
+      unsubTransactions();
       unsubProducts();
       unsubUsers();
     };
   }, []);
 
   // Derived State
-  const revenue = 
-    boutiqueOrders
-      .filter(o => o.status === 'completed')
-      .reduce((acc, curr) => acc + (curr.total || 0), 0) +
-    customOrders
-      .reduce((acc, curr) => acc + (curr.deposit || 0), 0);
+  const cashBalance = transactions.reduce((acc, curr) => {
+    if (curr.type === 'vente' || curr.type === 'entree') return acc + (curr.amount || 0);
+    if (curr.type === 'sortie') return acc - (curr.amount || 0);
+    return acc;
+  }, 0);
 
   const recentOrders = [...boutiqueOrders, ...customOrders]
     .sort((a, b) => {
@@ -67,18 +74,18 @@ const Dashboard: FC = () => {
     .slice(0, 5);
 
   useEffect(() => {
-    if (boutiqueOrders.length || customOrders.length || productsCount || customersCount) {
+    if (boutiqueOrders.length || customOrders.length || productsCount || customersCount || transactions.length) {
       setLoading(false);
     }
-  }, [boutiqueOrders, customOrders, productsCount, customersCount]);
+  }, [boutiqueOrders, customOrders, productsCount, customersCount, transactions]);
 
   const statCards = [
     { 
-      label: "Revenus (Global)", 
-      value: `${revenue.toLocaleString()} FCFA`, 
+      label: "Solde Caisse", 
+      value: `${cashBalance.toLocaleString()} FCFA`, 
       icon: FiDollarSign, 
       color: "bg-green-500",
-      trend: "Total encaissé"
+      trend: "Solde actuel"
     },
     { 
       label: "Commandes Totales", 

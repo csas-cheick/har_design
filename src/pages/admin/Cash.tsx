@@ -6,7 +6,8 @@ import {
   FiPrinter,
   FiCalendar,
   FiCreditCard,
-  FiTrendingUp
+  FiTrendingUp,
+  FiX
 } from "react-icons/fi";
 import AdminLayout from "../../components/admin/AdminLayout";
 import { useAuth } from "../../context/AuthContext";
@@ -24,7 +25,7 @@ interface Transaction {
 
 const Cash: FC = () => {
   const { user } = useAuth();
-  const [selectedDate, setSelectedDate] = useState(new Date().toISOString().split('T')[0]);
+  const [selectedDate, setSelectedDate] = useState("");
   const [showTransactionModal, setShowTransactionModal] = useState(false);
   const [transactionType, setTransactionType] = useState<"entree" | "sortie">("entree");
   const [transactions, setTransactions] = useState<Transaction[]>([]);
@@ -52,9 +53,15 @@ const Cash: FC = () => {
     return price.toString().replace(/\B(?=(\d{3})+(?!\d))/g, " ");
   };
 
-  const formatTime = (timestamp: string) => {
+  const formatDate = (timestamp: string) => {
     const date = new Date(timestamp);
-    return date.toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' });
+    return date.toLocaleDateString('fr-FR', { 
+      day: '2-digit', 
+      month: '2-digit', 
+      year: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit'
+    });
   };
 
   // Calculs
@@ -146,6 +153,15 @@ const Cash: FC = () => {
                     onChange={(e) => setSelectedDate(e.target.value)}
                     className="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-black focus:border-transparent"
                   />
+                  {selectedDate && (
+                    <button
+                      onClick={() => setSelectedDate("")}
+                      className="p-2 text-gray-400 hover:text-red-500 transition-colors"
+                      title="Effacer le filtre"
+                    >
+                      <FiX className="w-5 h-5" />
+                    </button>
+                  )}
                 </div>
                 <p className="text-sm text-gray-600 mt-3">
                   {todayTransactions.length} transaction{todayTransactions.length > 1 ? "s" : ""}
@@ -154,7 +170,7 @@ const Cash: FC = () => {
 
               {/* Stats Summary */}
               <div className="bg-gradient-to-br from-gray-900 to-gray-800 rounded-xl shadow-sm p-6 text-white print:hidden">
-                <h3 className="text-sm font-semibold mb-4 opacity-90">Résumé du jour</h3>
+                <h3 className="text-sm font-semibold mb-4 opacity-90">{selectedDate ? "Résumé du jour" : "Résumé Global"}</h3>
                 <div className="space-y-4">
                   <div>
                     <p className="text-xs opacity-75 mb-1">Ventes sur site</p>
@@ -173,7 +189,7 @@ const Cash: FC = () => {
                   </div>
                   <div className="h-px bg-white/20"></div>
                   <div className="bg-white/10 rounded-lg p-4">
-                    <p className="text-xs opacity-75 mb-1">Solde journalier</p>
+                    <p className="text-xs opacity-75 mb-1">{selectedDate ? "Solde journalier" : "Solde Total"}</p>
                     <p className={`text-2xl font-bold ${soldeJournalier >= 0 ? "text-green-400" : "text-red-400"}`}>
                       {formatPrice(soldeJournalier)} FCFA
                     </p>
@@ -247,7 +263,7 @@ const Cash: FC = () => {
               <table className="w-full min-w-[600px] print:text-sm">
                 <thead className="bg-gray-50 print:bg-gray-100">
                   <tr>
-                    <th className="text-left py-3 px-4 md:px-6 text-sm font-semibold text-gray-900 print:py-2 print:px-3">Heure</th>
+                    <th className="text-left py-3 px-4 md:px-6 text-sm font-semibold text-gray-900 print:py-2 print:px-3">Date</th>
                     <th className="text-left py-3 px-4 md:px-6 text-sm font-semibold text-gray-900 print:py-2 print:px-3">Type</th>
                     <th className="text-left py-3 px-4 md:px-6 text-sm font-semibold text-gray-900 print:py-2 print:px-3">Description</th>
                     <th className="text-left py-3 px-4 md:px-6 text-sm font-semibold text-gray-900 print:py-2 print:px-3">Paiement</th>
@@ -259,7 +275,7 @@ const Cash: FC = () => {
                     todayTransactions.map((transaction) => (
                       <tr key={transaction.id} className="hover:bg-gray-50 transition-colors print:hover:bg-transparent">
                         <td className="py-4 px-4 md:px-6 text-sm text-gray-600 print:py-1.5 print:px-3">
-                          {formatTime(transaction.timestamp)}
+                          {formatDate(transaction.timestamp)}
                         </td>
                         <td className="py-4 px-4 md:px-6 print:py-1.5 print:px-3">
                           <span
