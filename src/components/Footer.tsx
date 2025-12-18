@@ -1,5 +1,5 @@
 import { FC } from "react";
-import { FaGithub, FaLinkedin, FaInstagram } from "react-icons/fa";
+import { FaGithub, FaLinkedin, FaInstagram, FaGlobe } from "react-icons/fa";
 
 const Footer: FC = () => {
   const currentYear = new Date().getFullYear();
@@ -46,6 +46,15 @@ const Footer: FC = () => {
               className="text-gray-400 hover:text-white transition-colors duration-300"
             >
               <FaInstagram className="text-lg" />
+            </a>
+            <a
+              href="https://csascheick.vercel.app/"
+              target="_blank"
+              rel="noopener noreferrer"
+              title="Portfolio"
+              className="text-gray-400 hover:text-white transition-colors duration-300"
+            >
+              <FaGlobe className="text-lg" />
             </a>
           </div>
         </div>
