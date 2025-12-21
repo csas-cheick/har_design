@@ -136,65 +136,65 @@ const Dashboard: FC = () => {
           </div>
 
           {/* Quick Actions */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6 mb-8">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 md:gap-6 mb-6 md:mb-8">
             <Link
               to="/admin/custom-orders"
-              className="bg-white rounded-xl shadow-sm border border-gray-200 p-4 md:p-6 hover:shadow-md transition-shadow group"
+              className="bg-white rounded-xl shadow-sm border border-gray-200 p-4 hover:shadow-md transition-shadow group"
             >
-              <div className="flex items-center gap-4">
-                <div className="bg-pink-100 p-3 rounded-lg group-hover:bg-pink-200 transition-colors">
-                  <FiScissors className="w-6 h-6 text-pink-600" />
+              <div className="flex items-center gap-3 md:gap-4">
+                <div className="bg-pink-100 p-2 md:p-3 rounded-lg group-hover:bg-pink-200 transition-colors">
+                  <FiScissors className="w-5 h-5 md:w-6 md:h-6 text-pink-600" />
                 </div>
                 <div>
-                  <h3 className="font-semibold text-gray-900">Nouvelle Couture</h3>
-                  <p className="text-sm text-gray-600">Créer une commande sur mesure</p>
+                  <h3 className="font-semibold text-sm md:text-base text-gray-900">Nouvelle Couture</h3>
+                  <p className="text-xs md:text-sm text-gray-600">Créer une commande sur mesure</p>
                 </div>
               </div>
             </Link>
 
             <Link
               to="/admin/orders"
-              className="bg-white rounded-xl shadow-sm border border-gray-200 p-4 md:p-6 hover:shadow-md transition-shadow group"
+              className="bg-white rounded-xl shadow-sm border border-gray-200 p-4 hover:shadow-md transition-shadow group"
             >
-              <div className="flex items-center gap-4">
-                <div className="bg-green-100 p-3 rounded-lg group-hover:bg-green-200 transition-colors">
-                  <FiShoppingBag className="w-6 h-6 text-green-600" />
+              <div className="flex items-center gap-3 md:gap-4">
+                <div className="bg-green-100 p-2 md:p-3 rounded-lg group-hover:bg-green-200 transition-colors">
+                  <FiShoppingBag className="w-5 h-5 md:w-6 md:h-6 text-green-600" />
                 </div>
                 <div>
-                  <h3 className="font-semibold text-gray-900">Commandes Boutique</h3>
-                  <p className="text-sm text-gray-600">Gérer les ventes en ligne</p>
+                  <h3 className="font-semibold text-sm md:text-base text-gray-900">Commandes Boutique</h3>
+                  <p className="text-xs md:text-sm text-gray-600">Gérer les ventes en ligne</p>
                 </div>
               </div>
             </Link>
 
             <Link
               to="/admin/customers"
-              className="bg-white rounded-xl shadow-sm border border-gray-200 p-4 md:p-6 hover:shadow-md transition-shadow group"
+              className="bg-white rounded-xl shadow-sm border border-gray-200 p-4 hover:shadow-md transition-shadow group"
             >
-              <div className="flex items-center gap-4">
-                <div className="bg-orange-100 p-3 rounded-lg group-hover:bg-orange-200 transition-colors">
-                  <FiUsers className="w-6 h-6 text-orange-600" />
+              <div className="flex items-center gap-3 md:gap-4">
+                <div className="bg-orange-100 p-2 md:p-3 rounded-lg group-hover:bg-orange-200 transition-colors">
+                  <FiUsers className="w-5 h-5 md:w-6 md:h-6 text-orange-600" />
                 </div>
                 <div>
-                  <h3 className="font-semibold text-gray-900">Nouveau Client</h3>
-                  <p className="text-sm text-gray-600">Ajouter un client à la base</p>
+                  <h3 className="font-semibold text-sm md:text-base text-gray-900">Nouveau Client</h3>
+                  <p className="text-xs md:text-sm text-gray-600">Ajouter un client à la base</p>
                 </div>
               </div>
             </Link>
           </div>
 
           {/* Recent Orders */}
-          <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+          <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-4 md:p-6">
             <h2 className="text-lg font-bold text-gray-900 mb-4">Dernières Commandes</h2>
             <div className="overflow-x-auto">
-              <table className="w-full">
+              <table className="w-full min-w-[600px]">
                 <thead>
                   <tr className="border-b border-gray-200">
-                    <th className="text-left py-3 px-4 text-sm font-semibold text-gray-900">Type</th>
-                    <th className="text-left py-3 px-4 text-sm font-semibold text-gray-900">Client</th>
-                    <th className="text-left py-3 px-4 text-sm font-semibold text-gray-900">Montant</th>
-                    <th className="text-left py-3 px-4 text-sm font-semibold text-gray-900">Statut</th>
-                    <th className="text-left py-3 px-4 text-sm font-semibold text-gray-900">Date</th>
+                    <th className="text-left py-3 px-2 md:px-4 text-xs md:text-sm font-semibold text-gray-900">Type</th>
+                    <th className="text-left py-3 px-2 md:px-4 text-xs md:text-sm font-semibold text-gray-900">Client</th>
+                    <th className="text-left py-3 px-2 md:px-4 text-xs md:text-sm font-semibold text-gray-900">Montant</th>
+                    <th className="text-left py-3 px-2 md:px-4 text-xs md:text-sm font-semibold text-gray-900">Statut</th>
+                    <th className="text-left py-3 px-2 md:px-4 text-xs md:text-sm font-semibold text-gray-900">Date</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -209,22 +209,22 @@ const Dashboard: FC = () => {
                   ) : (
                     recentOrders.map((order) => (
                       <tr key={order.id} className="border-b border-gray-100 hover:bg-gray-50">
-                        <td className="py-3 px-4">
-                          <span className={`px-2 py-1 text-xs font-medium rounded-full ${
+                        <td className="py-3 px-2 md:px-4">
+                          <span className={`px-2 py-1 text-[10px] md:text-xs font-medium rounded-full ${
                             order.type === 'couture' ? 'bg-pink-100 text-pink-800' : 'bg-blue-100 text-blue-800'
                           }`}>
                             {order.type === 'couture' ? 'Couture' : 'Boutique'}
                           </span>
                         </td>
-                        <td className="py-3 px-4 text-sm font-medium text-gray-900">
+                        <td className="py-3 px-2 md:px-4 text-xs md:text-sm font-medium text-gray-900">
                           {order.customerName}
                         </td>
-                        <td className="py-3 px-4 text-sm text-gray-900">
+                        <td className="py-3 px-2 md:px-4 text-xs md:text-sm text-gray-900">
                           {(order.total || order.price || 0).toLocaleString()} FCFA
                         </td>
-                        <td className="py-3 px-4">
+                        <td className="py-3 px-2 md:px-4">
                           <span
-                            className={`px-3 py-1 text-xs font-medium rounded-full ${
+                            className={`px-2 py-1 md:px-3 md:py-1 text-[10px] md:text-xs font-medium rounded-full ${
                               ['completed', 'delivered'].includes(order.status)
                                 ? "bg-green-100 text-green-800"
                                 : ['cancelled'].includes(order.status)
@@ -238,7 +238,7 @@ const Dashboard: FC = () => {
                              order.status === 'pending' ? 'En attente' : 'En cours'}
                           </span>
                         </td>
-                        <td className="py-3 px-4 text-sm text-gray-600">
+                        <td className="py-3 px-2 md:px-4 text-xs md:text-sm text-gray-600">
                           {order.createdAt?.toDate 
                             ? order.createdAt.toDate().toLocaleDateString('fr-FR')
                             : new Date(order.createdAt).toLocaleDateString('fr-FR')}

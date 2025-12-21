@@ -19,7 +19,9 @@ import Cash from "./pages/admin/Cash";
 import CoutureModels from "./pages/admin/CoutureModels";
 import Measurements from "./pages/admin/Measurements";
 import CustomOrders from "./pages/admin/CustomOrders";
+import AdminProfile from "./pages/admin/AdminProfile";
 import ClientOrders from "./pages/ClientOrders";
+import Profile from "./pages/Profile";
 import { CartProvider } from "./context/CartContext";
 import { AuthProvider, useAuth } from "./context/AuthContext";
 
@@ -64,6 +66,7 @@ const App: FC = () => {
                     <Route path="/couture-models" element={<CoutureModels />} />
                     <Route path="/measurements" element={<Measurements />} />
                     <Route path="/custom-orders" element={<CustomOrders />} />
+                    <Route path="/profile" element={<AdminProfile />} />
                   </Routes>
                 </AdminRoute>
               }
@@ -83,6 +86,7 @@ const App: FC = () => {
                       <Route path="/contact" element={<Contact />} />
                       <Route path="/cart" element={<Cart />} />
                       <Route path="/my-orders" element={<ClientOrders />} />
+                      <Route path="/profile" element={<Profile />} />
                     </Routes>
                   </main>
                   <WhatsAppButton />

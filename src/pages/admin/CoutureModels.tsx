@@ -125,10 +125,10 @@ const CoutureModels: FC = () => {
 
   return (
     <AdminLayout>
-      <div className="flex items-center justify-between mb-6">
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
         <div>
-          <h2 className="text-2xl font-bold text-gray-900">Modèles de Couture</h2>
-          <p className="text-gray-600 mt-1">Gérez votre catalogue de modèles</p>
+          <h2 className="text-xl md:text-2xl font-bold text-gray-900">Modèles de Couture</h2>
+          <p className="text-sm md:text-base text-gray-600 mt-1">Gérez votre catalogue de modèles</p>
         </div>
         <button
           onClick={() => {
@@ -138,59 +138,75 @@ const CoutureModels: FC = () => {
             setImagePreview(null);
             setShowModal(true);
           }}
-          className="flex items-center gap-2 bg-black text-white px-4 py-2 rounded-lg hover:bg-gray-800 transition-colors"
+          className="flex items-center justify-center gap-2 bg-black text-white px-4 py-2 md:px-6 md:py-3 rounded-lg text-sm md:text-base font-semibold hover:bg-gray-800 transition-colors w-full md:w-auto"
         >
-          <FiPlus className="w-5 h-5" />
+          <FiPlus className="w-4 h-4 md:w-5 md:h-5" />
           Nouveau Modèle
         </button>
       </div>
 
       {/* Search Bar */}
-      <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 mb-6">
+      <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-4 md:p-6 mb-6">
         <div className="relative max-w-md">
           <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-            <FiSearch className="w-5 h-5 text-gray-400" />
+            <FiSearch className="w-4 h-4 md:w-5 md:h-5 text-gray-400" />
           </div>
           <input
             type="text"
             placeholder="Rechercher un modèle..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            className="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-lg leading-5 bg-white placeholder-gray-500 focus:outline-none focus:placeholder-gray-400 focus:ring-1 focus:ring-black focus:border-black sm:text-sm"
+            className="block w-full pl-9 md:pl-10 pr-3 py-2 md:py-2.5 text-sm md:text-base border border-gray-300 rounded-lg leading-5 bg-white placeholder-gray-500 focus:outline-none focus:placeholder-gray-400 focus:ring-1 focus:ring-black focus:border-black"
           />
         </div>
       </div>
 
-      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-2 md:gap-4">
+      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3 md:gap-4">
             {filteredModels.map((model) => (
               <div key={model.id} className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden group">
                 <div className="relative h-32 md:h-48 bg-gray-100">
                   {model.image ? (
-                    <img src={model.image} alt={model.name} className="w-full h-full object-contain p-2" />
+                    <img src={model.image} alt={model.name} className="w-full h-full object-cover" />
                   ) : (
                     <div className="w-full h-full flex items-center justify-center text-gray-400">
                       <FiScissors className="w-8 h-8 md:w-12 md:h-12" />
                     </div>
                   )}
-                  <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2">
+                  <div className="hidden md:flex absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity items-center justify-center gap-2">
                     <button
                       onClick={() => handleEdit(model)}
-                      className="p-1.5 md:p-2 bg-white text-gray-900 rounded-full hover:bg-gray-100"
+                      className="p-2 bg-white text-gray-900 rounded-full hover:bg-gray-100"
                     >
-                      <FiEdit className="w-4 h-4 md:w-5 md:h-5" />
+                      <FiEdit className="w-5 h-5" />
                     </button>
                     <button
                       onClick={() => handleDelete(model.id)}
-                      className="p-1.5 md:p-2 bg-red-600 text-white rounded-full hover:bg-red-700"
+                      className="p-2 bg-red-600 text-white rounded-full hover:bg-red-700"
                     >
-                      <FiTrash2 className="w-4 h-4 md:w-5 md:h-5" />
+                      <FiTrash2 className="w-5 h-5" />
                     </button>
                   </div>
                 </div>
-                <div className="p-2 md:p-4">
-                  <h3 className="font-bold text-sm md:text-base text-gray-900 truncate">{model.name}</h3>
-                  <p className="text-xs md:text-sm text-gray-500 mt-1 line-clamp-2">{model.description}</p>
-                  <p className="text-sm md:text-lg font-bold text-gray-900 mt-2">{model.price.toLocaleString()} FCFA</p>
+                <div className="p-3 md:p-4">
+                  <h3 className="font-bold text-xs md:text-base text-gray-900 truncate">{model.name}</h3>
+                  <p className="text-[10px] md:text-sm text-gray-500 mt-1 line-clamp-2">{model.description}</p>
+                  <div className="flex items-center justify-between mt-2">
+                    <p className="text-sm md:text-lg font-bold text-gray-900">{model.price.toLocaleString()} FCFA</p>
+                    <div className="flex md:hidden gap-2">
+                      <button
+                        onClick={() => handleEdit(model)}
+                        className="p-1.5 bg-gray-100 text-gray-600 rounded-lg"
+                      >
+                        <FiEdit className="w-3.5 h-3.5" />
+                      </button>
+                      <button
+                        onClick={() => handleDelete(model.id)}
+                        className="p-1.5 bg-red-50 text-red-600 rounded-lg"
+                      >
+                        <FiTrash2 className="w-3.5 h-3.5" />
+                      </button>
+                    </div>
+                  </div>
                 </div>
               </div>
             ))}

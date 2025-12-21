@@ -134,19 +134,19 @@ const Customers: FC = () => {
           {/* Customers Table */}
           <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
             <div className="overflow-x-auto">
-              <table className="min-w-[800px] w-full divide-y divide-gray-200">
+              <table className="w-full divide-y divide-gray-200">
                 <thead className="bg-gray-50">
                   <tr>
-                    <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    <th scope="col" className="px-4 py-3 md:px-6 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                       Client
                     </th>
-                    <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    <th scope="col" className="hidden md:table-cell px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                       Contact
                     </th>
-                    <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    <th scope="col" className="hidden md:table-cell px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                       Date d'inscription
                     </th>
-                    <th scope="col" className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    <th scope="col" className="px-4 py-3 md:px-6 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
                       Actions
                     </th>
                   </tr>
@@ -167,20 +167,23 @@ const Customers: FC = () => {
                   ) : (
                     filteredCustomers.map((customer) => (
                       <tr key={customer.id} className="hover:bg-gray-50">
-                        <td className="px-6 py-4 whitespace-nowrap">
+                        <td className="px-4 py-3 md:px-6 md:py-4 whitespace-nowrap">
                           <div className="flex items-center">
-                            <div className="flex-shrink-0 h-10 w-10 bg-gray-100 rounded-full flex items-center justify-center">
-                              <FiUser className="h-5 w-5 text-gray-500" />
+                            <div className="flex-shrink-0 h-9 w-9 md:h-10 md:w-10 bg-gray-100 rounded-full flex items-center justify-center">
+                              <FiUser className="h-4 w-4 md:h-5 md:w-5 text-gray-500" />
                             </div>
-                            <div className="ml-4">
+                            <div className="ml-3 md:ml-4">
                               <div className="text-sm font-medium text-gray-900">
                                 {customer.firstName} {customer.lastName}
                               </div>
-                              <div className="text-sm text-gray-500">ID: {customer.id.slice(0, 8)}...</div>
+                              <div className="md:hidden text-xs text-gray-500 flex flex-col gap-0.5 mt-0.5">
+                                <span className="flex items-center gap-1"><FiPhone className="w-3 h-3" /> {customer.phone}</span>
+                              </div>
+                              <div className="hidden md:block text-sm text-gray-500">ID: {customer.id.slice(0, 8)}...</div>
                             </div>
                           </div>
                         </td>
-                        <td className="px-6 py-4 whitespace-nowrap">
+                        <td className="hidden md:table-cell px-6 py-4 whitespace-nowrap">
                           <div className="flex flex-col space-y-1">
                             <div className="flex items-center text-sm text-gray-500">
                               <FiMail className="mr-2 h-4 w-4" />
@@ -192,15 +195,16 @@ const Customers: FC = () => {
                             </div>
                           </div>
                         </td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                        <td className="hidden md:table-cell px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                           - {/* Date d'inscription not stored yet, maybe add later */}
                         </td>
-                        <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                        <td className="px-4 py-3 md:px-6 md:py-4 whitespace-nowrap text-right text-sm font-medium">
                           <button 
                             onClick={() => setSelectedCustomer(customer)}
-                            className="text-indigo-600 hover:text-indigo-900"
+                            className="text-indigo-600 hover:text-indigo-900 bg-indigo-50 md:bg-transparent px-3 py-1.5 md:p-0 rounded-lg md:rounded-none text-xs md:text-sm font-medium"
                           >
-                            Détails
+                            <span className="md:hidden">Voir</span>
+                            <span className="hidden md:inline">Détails</span>
                           </button>
                         </td>
                       </tr>

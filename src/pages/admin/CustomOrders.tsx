@@ -226,7 +226,7 @@ const CustomOrdersPage: FC = () => {
 
       {/* Filters */}
       <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-4 md:p-6 mb-6">
-        <div className="flex flex-col lg:flex-row gap-4">
+        <div className="flex flex-col md:flex-row gap-4">
           <div className="flex-1">
             <div className="relative">
               <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
@@ -262,88 +262,97 @@ const CustomOrdersPage: FC = () => {
       {/* Orders List */}
       <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
         <div className="overflow-x-auto">
-          <table className="w-full text-left min-w-[800px]">
+          <table className="w-full text-left">
             <thead className="bg-gray-50 border-b border-gray-200">
               <tr>
-                <th className="px-6 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider">Client</th>
-                <th className="px-6 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider">Modèle</th>
-                <th className="px-6 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider">Livraison</th>
-                <th className="px-6 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider">Prix / Avance</th>
-                <th className="px-6 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider">Statut</th>
-                <th className="px-6 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+                <th className="px-3 py-3 md:px-6 text-xs font-medium text-gray-500 uppercase tracking-wider">Client</th>
+                <th className="hidden md:table-cell px-6 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider">Modèle</th>
+                <th className="hidden md:table-cell px-6 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider">Livraison</th>
+                <th className="px-3 py-3 md:px-6 text-xs font-medium text-gray-500 uppercase tracking-wider">Prix / Avance</th>
+                <th className="hidden md:table-cell px-6 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider">Statut</th>
+                <th className="px-3 py-3 md:px-6 text-right md:text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-200">
               {filteredOrders.map((order) => (
                 <tr key={order.id} className="hover:bg-gray-50">
-                  <td className="px-6 py-4">
-                    <div className="font-medium text-gray-900">{order.customerName}</div>
-                    <div className="text-sm text-gray-500">{order.customerPhone}</div>
+                  <td className="px-3 py-3 md:px-6 md:py-4">
+                    <div className="font-medium text-sm md:text-base text-gray-900 truncate max-w-[120px] md:max-w-none">{order.customerName}</div>
+                    <div className="text-xs md:text-sm text-gray-500 truncate max-w-[120px] md:max-w-none">{order.customerPhone}</div>
+                    <div className="md:hidden mt-1 text-xs text-gray-500 flex items-center gap-1">
+                      <FiScissors className="w-3 h-3" />
+                      <span className="truncate max-w-[100px]">{order.modelName}</span>
+                    </div>
                   </td>
-                  <td className="px-6 py-4">
+                  <td className="hidden md:table-cell px-6 py-4">
                     <div className="flex items-center gap-2">
                       <FiScissors className="text-gray-400" />
                       <span className="text-gray-900">{order.modelName}</span>
                     </div>
                   </td>
-                  <td className="px-6 py-4">
+                  <td className="hidden md:table-cell px-6 py-4">
                     <div className="flex items-center gap-2 text-gray-600">
                       <FiCalendar className="w-4 h-4" />
                       {order.deadline.toDate().toLocaleDateString('fr-FR')}
                     </div>
                   </td>
-                  <td className="px-6 py-4">
-                    <div className="font-medium text-gray-900">{order.price.toLocaleString()} FCFA</div>
-                    <div className="text-xs text-green-600">Avance: {order.deposit.toLocaleString()} FCFA</div>
+                  <td className="px-3 py-3 md:px-6 md:py-4">
+                    <div className="font-medium text-sm md:text-base text-gray-900">{order.price.toLocaleString()} FCFA</div>
+                    <div className="text-[10px] md:text-xs text-green-600">Avance: {order.deposit.toLocaleString()}</div>
+                    <div className="md:hidden mt-1">
+                      <span className={`px-2 py-0.5 text-[10px] font-medium rounded-full ${getStatusColor(order.status)}`}>
+                        {getStatusLabel(order.status)}
+                      </span>
+                    </div>
                   </td>
-                  <td className="px-6 py-4">
+                  <td className="hidden md:table-cell px-6 py-4">
                     <span className={`px-2 py-1 text-xs font-medium rounded-full ${getStatusColor(order.status)}`}>
                       {getStatusLabel(order.status)}
                     </span>
                   </td>
-                  <td className="px-6 py-4">
-                    <div className="flex items-center gap-2">
+                  <td className="px-3 py-3 md:px-6 md:py-4">
+                    <div className="flex items-center justify-end md:justify-start gap-1 md:gap-2">
                       <button 
                         onClick={() => setSelectedOrder(order)}
-                        className="p-2 text-gray-400 hover:text-black hover:bg-gray-100 rounded-lg transition-colors"
+                        className="p-1.5 md:p-2 text-gray-400 hover:text-black hover:bg-gray-100 rounded-lg transition-colors"
                         title="Voir détails"
                       >
-                        <FiEye className="w-5 h-5" />
+                        <FiEye className="w-4 h-4 md:w-5 md:h-5" />
                       </button>
                       {order.status === "pending" && (
                         <>
                           <button
                             onClick={() => handleUpdateStatus(order.id, "in_progress")}
-                            className="p-2 text-green-600 hover:bg-green-50 rounded-lg transition-colors"
+                            className="p-1.5 md:p-2 text-green-600 hover:bg-green-50 rounded-lg transition-colors"
                             title="Valider / Commencer"
                           >
-                            <FiCheck className="w-5 h-5" />
+                            <FiCheck className="w-4 h-4 md:w-5 md:h-5" />
                           </button>
                           <button
                             onClick={() => handleUpdateStatus(order.id, "cancelled")}
-                            className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+                            className="p-1.5 md:p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors"
                             title="Annuler"
                           >
-                            <FiX className="w-5 h-5" />
+                            <FiX className="w-4 h-4 md:w-5 md:h-5" />
                           </button>
                         </>
                       )}
                       {order.status === "in_progress" && (
                         <button
                           onClick={() => handleUpdateStatus(order.id, "completed")}
-                          className="p-2 text-green-600 hover:bg-green-50 rounded-lg transition-colors"
+                          className="p-1.5 md:p-2 text-green-600 hover:bg-green-50 rounded-lg transition-colors"
                           title="Marquer comme Terminé"
                         >
-                          <FiCheck className="w-5 h-5" />
+                          <FiCheck className="w-4 h-4 md:w-5 md:h-5" />
                         </button>
                       )}
                       {order.status === "completed" && (
                         <button
                           onClick={() => handleUpdateStatus(order.id, "delivered")}
-                          className="p-2 text-gray-900 hover:bg-gray-100 rounded-lg transition-colors"
+                          className="p-1.5 md:p-2 text-gray-900 hover:bg-gray-100 rounded-lg transition-colors"
                           title="Marquer comme Livré"
                         >
-                          <FiPackage className="w-5 h-5" />
+                          <FiPackage className="w-4 h-4 md:w-5 md:h-5" />
                         </button>
                       )}
                     </div>

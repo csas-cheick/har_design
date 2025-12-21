@@ -151,7 +151,7 @@ const Orders: FC = () => {
 
           {/* Filters */}
           <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-4 md:p-6 mb-6">
-            <div className="flex flex-col lg:flex-row gap-4">
+            <div className="flex flex-col md:flex-row gap-4">
               <div className="flex-1">
                 <div className="relative">
                   <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
@@ -187,15 +187,15 @@ const Orders: FC = () => {
           {/* Orders Table */}
           <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
             <div className="overflow-x-auto">
-              <table className="w-full min-w-[800px]">
+              <table className="w-full">
                 <thead className="bg-gray-50">
                   <tr>
-                    <th className="text-left py-4 px-6 text-sm font-semibold text-gray-900">ID Commande</th>
-                    <th className="text-left py-4 px-6 text-sm font-semibold text-gray-900">Client</th>
-                    <th className="text-left py-4 px-6 text-sm font-semibold text-gray-900">Date</th>
-                    <th className="text-left py-4 px-6 text-sm font-semibold text-gray-900">Total</th>
-                    <th className="text-left py-4 px-6 text-sm font-semibold text-gray-900">Statut</th>
-                    <th className="text-left py-4 px-6 text-sm font-semibold text-gray-900">Actions</th>
+                    <th className="hidden md:table-cell text-left py-4 px-6 text-sm font-semibold text-gray-900">ID Commande</th>
+                    <th className="text-left py-3 px-2 md:py-4 md:px-6 text-xs md:text-sm font-semibold text-gray-900">Client</th>
+                    <th className="hidden md:table-cell text-left py-4 px-6 text-sm font-semibold text-gray-900">Date</th>
+                    <th className="text-left py-3 px-2 md:py-4 md:px-6 text-xs md:text-sm font-semibold text-gray-900">Total</th>
+                    <th className="hidden md:table-cell text-left py-4 px-6 text-sm font-semibold text-gray-900">Statut</th>
+                    <th className="text-right md:text-left py-3 px-2 md:py-4 md:px-6 text-xs md:text-sm font-semibold text-gray-900">Actions</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-gray-200">
@@ -206,52 +206,59 @@ const Orders: FC = () => {
                   ) : filteredOrders.length > 0 ? (
                     filteredOrders.map((order) => (
                       <tr key={order.id} className="hover:bg-gray-50 transition-colors">
-                        <td className="py-4 px-6 font-medium text-gray-900">#{order.id.slice(0, 8)}</td>
-                        <td className="py-4 px-6">
-                          <p className="font-medium text-gray-900">{order.customerName}</p>
-                          <p className="text-sm text-gray-500">{order.customerPhone}</p>
+                        <td className="hidden md:table-cell py-4 px-6 font-medium text-gray-900">#{order.id.slice(0, 8)}</td>
+                        <td className="py-3 px-2 md:py-4 md:px-6">
+                          <p className="font-medium text-xs md:text-base text-gray-900 truncate max-w-[100px] md:max-w-none">{order.customerName}</p>
+                          <p className="text-[10px] md:text-sm text-gray-500 truncate max-w-[100px] md:max-w-none">{order.customerPhone}</p>
                         </td>
-                        <td className="py-4 px-6 text-gray-600">{formatDate(order.createdAt)}</td>
-                        <td className="py-4 px-6 font-bold text-gray-900">{formatPrice(order.total)} FCFA</td>
-                        <td className="py-4 px-6">
+                        <td className="hidden md:table-cell py-4 px-6 text-gray-600">{formatDate(order.createdAt)}</td>
+                        <td className="py-3 px-2 md:py-4 md:px-6">
+                          <p className="font-bold text-xs md:text-base text-gray-900">{formatPrice(order.total)} FCFA</p>
+                          <div className="md:hidden mt-1">
+                            <span className={`px-2 py-0.5 text-[10px] font-medium rounded-full ${getStatusColor(order.status)}`}>
+                              {getStatusLabel(order.status)}
+                            </span>
+                          </div>
+                        </td>
+                        <td className="hidden md:table-cell py-4 px-6">
                           <span className={`px-3 py-1 text-sm font-medium rounded-full ${getStatusColor(order.status)}`}>
                             {getStatusLabel(order.status)}
                           </span>
                         </td>
-                        <td className="py-4 px-6">
-                          <div className="flex items-center gap-2">
+                        <td className="py-3 px-2 md:py-4 md:px-6">
+                          <div className="flex items-center justify-end md:justify-start gap-1 md:gap-2">
                             <button
                               onClick={() => setSelectedOrder(order)}
-                              className="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
+                              className="p-1.5 md:p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
                               title="Voir détails"
                             >
-                              <FiEye className="w-5 h-5" />
+                              <FiEye className="w-4 h-4 md:w-5 md:h-5" />
                             </button>
                             {order.status === "pending" && (
                               <>
                                 <button
                                   onClick={() => handleStatusUpdate(order.id, "processing")}
-                                  className="p-2 text-green-600 hover:bg-green-50 rounded-lg transition-colors"
+                                  className="p-1.5 md:p-2 text-green-600 hover:bg-green-50 rounded-lg transition-colors"
                                   title="Valider"
                                 >
-                                  <FiCheck className="w-5 h-5" />
+                                  <FiCheck className="w-4 h-4 md:w-5 md:h-5" />
                                 </button>
                                 <button
                                   onClick={() => handleStatusUpdate(order.id, "cancelled")}
-                                  className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+                                  className="p-1.5 md:p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors"
                                   title="Annuler"
                                 >
-                                  <FiX className="w-5 h-5" />
+                                  <FiX className="w-4 h-4 md:w-5 md:h-5" />
                                 </button>
                               </>
                             )}
                             {order.status === "processing" && (
                               <button
                                 onClick={() => handleStatusUpdate(order.id, "completed")}
-                                className="p-2 text-green-600 hover:bg-green-50 rounded-lg transition-colors"
+                                className="p-1.5 md:p-2 text-green-600 hover:bg-green-50 rounded-lg transition-colors"
                                 title="Marquer comme livré"
                               >
-                                <FiPackage className="w-5 h-5" />
+                                <FiPackage className="w-4 h-4 md:w-5 md:h-5" />
                               </button>
                             )}
                           </div>

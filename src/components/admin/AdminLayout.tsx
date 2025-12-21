@@ -1,5 +1,5 @@
 import { FC, ReactNode, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import { FiLogOut, FiMenu, FiX } from "react-icons/fi";
 import Sidebar from "./Sidebar";
 import { useAuth } from "../../context/AuthContext";
@@ -47,12 +47,12 @@ const AdminLayout: FC<AdminLayoutProps> = ({ children }) => {
               </div>
             </div>
             <div className="flex items-center gap-4">
-              <div className="text-right hidden md:block">
+              <Link to="/admin/profile" className="text-right hidden md:block hover:opacity-80 transition-opacity">
                 <p className="text-sm font-medium text-gray-900">
                   {user?.firstName} {user?.lastName}
                 </p>
                 <p className="text-xs text-gray-500">{user?.role}</p>
-              </div>
+              </Link>
               <button
                 onClick={handleLogout}
                 className="p-2 text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-lg transition-colors"

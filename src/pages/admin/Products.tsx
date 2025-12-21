@@ -80,14 +80,14 @@ const Products: FC = () => {
           {/* Header Section */}
           <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
             <div>
-              <h2 className="text-2xl font-bold text-gray-900">Produits</h2>
-              <p className="text-gray-600 mt-1">Gérez votre catalogue de produits</p>
+              <h2 className="text-xl md:text-2xl font-bold text-gray-900">Produits</h2>
+              <p className="text-sm md:text-base text-gray-600 mt-1">Gérez votre catalogue de produits</p>
             </div>
             <Link
               to="/admin/products/new"
-              className="flex items-center justify-center gap-2 bg-black text-white px-6 py-3 rounded-lg font-semibold hover:bg-gray-800 transition-colors w-full md:w-auto"
+              className="flex items-center justify-center gap-2 bg-black text-white px-4 py-2 md:px-6 md:py-3 rounded-lg text-sm md:text-base font-semibold hover:bg-gray-800 transition-colors w-full md:w-auto"
             >
-              <FiPlus className="w-5 h-5" />
+              <FiPlus className="w-4 h-4 md:w-5 md:h-5" />
               Ajouter un produit
             </Link>
           </div>
@@ -99,14 +99,14 @@ const Products: FC = () => {
               <div className="flex-1">
                 <div className="relative">
                   <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                    <FiSearch className="w-5 h-5 text-gray-400" />
+                    <FiSearch className="w-4 h-4 md:w-5 md:h-5 text-gray-400" />
                   </div>
                   <input
                     type="text"
                     placeholder="Rechercher un produit..."
                     value={searchTerm}
                     onChange={(e) => setSearchTerm(e.target.value)}
-                    className="block w-full pl-10 pr-3 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-black focus:border-transparent"
+                    className="block w-full pl-9 md:pl-10 pr-3 py-2 md:py-2.5 text-sm md:text-base border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-black focus:border-transparent"
                   />
                 </div>
               </div>
@@ -117,7 +117,7 @@ const Products: FC = () => {
                   <button
                     key={cat}
                     onClick={() => setSelectedCategory(cat)}
-                    className={`px-4 py-2.5 rounded-lg font-medium transition-colors whitespace-nowrap ${
+                    className={`px-3 py-2 md:px-4 md:py-2.5 rounded-lg text-sm md:text-base font-medium transition-colors whitespace-nowrap ${
                       selectedCategory === cat
                         ? "bg-black text-white"
                         : "bg-gray-100 text-gray-700 hover:bg-gray-200"
@@ -133,22 +133,22 @@ const Products: FC = () => {
           {/* Products Table */}
           <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
             <div className="overflow-x-auto">
-              <table className="w-full min-w-[800px]">
+              <table className="w-full">
                 <thead className="bg-gray-50">
                   <tr>
-                    <th className="text-left py-4 px-6 text-sm font-semibold text-gray-900">
+                    <th className="text-left py-3 px-2 md:py-4 md:px-6 text-xs md:text-sm font-semibold text-gray-900">
                       Produit
                     </th>
-                    <th className="text-left py-4 px-6 text-sm font-semibold text-gray-900">
+                    <th className="hidden md:table-cell text-left py-3 px-4 md:py-4 md:px-6 text-xs md:text-sm font-semibold text-gray-900">
                       Catégorie
                     </th>
-                    <th className="text-left py-4 px-6 text-sm font-semibold text-gray-900">
+                    <th className="text-left py-3 px-2 md:py-4 md:px-6 text-xs md:text-sm font-semibold text-gray-900">
                       Prix
                     </th>
-                    <th className="text-left py-4 px-6 text-sm font-semibold text-gray-900">
+                    <th className="text-left py-3 px-2 md:py-4 md:px-6 text-xs md:text-sm font-semibold text-gray-900">
                       Stock
                     </th>
-                    <th className="text-left py-4 px-6 text-sm font-semibold text-gray-900">
+                    <th className="text-right md:text-left py-3 px-2 md:py-4 md:px-6 text-xs md:text-sm font-semibold text-gray-900">
                       Actions
                     </th>
                   </tr>
@@ -161,30 +161,33 @@ const Products: FC = () => {
                   ) : filteredProducts.length > 0 ? (
                     filteredProducts.map((product) => (
                       <tr key={product.id} className="hover:bg-gray-50 transition-colors">
-                        <td className="py-4 px-6">
-                          <div className="flex items-center gap-3">
-                            <div className="w-12 h-12 bg-gray-200 rounded-lg flex items-center justify-center">
-                              <FiPackage className="w-6 h-6 text-gray-400" />
+                        <td className="py-3 px-2 md:py-4 md:px-6">
+                          <div className="flex items-center gap-2 md:gap-3">
+                            <div className="w-8 h-8 md:w-12 md:h-12 bg-gray-200 rounded-lg flex items-center justify-center flex-shrink-0">
+                              {product.image ? (
+                                <img src={product.image} alt={product.name} className="w-full h-full object-cover rounded-lg" />
+                              ) : (
+                                <FiPackage className="w-4 h-4 md:w-6 md:h-6 text-gray-400" />
+                              )}
                             </div>
-                            <div>
-                              <p className="font-medium text-gray-900">{product.name}</p>
-                              <p className="text-sm text-gray-500 line-clamp-1">{product.description}</p>
+                            <div className="min-w-0">
+                              <p className="font-medium text-xs md:text-base text-gray-900 truncate max-w-[100px] md:max-w-none">{product.name}</p>
                             </div>
                           </div>
                         </td>
-                        <td className="py-4 px-6">
-                          <span className="px-3 py-1 bg-blue-100 text-blue-800 text-sm font-medium rounded-full">
+                        <td className="hidden md:table-cell py-3 px-4 md:py-4 md:px-6">
+                          <span className="px-2 py-1 md:px-3 md:py-1 bg-blue-100 text-blue-800 text-xs md:text-sm font-medium rounded-full">
                             {product.category}
                           </span>
                         </td>
-                        <td className="py-4 px-6">
-                          <span className="font-semibold text-gray-900">
-                            {formatPrice(product.price)} FCFA
+                        <td className="py-3 px-2 md:py-4 md:px-6">
+                          <span className="font-semibold text-xs md:text-base text-gray-900 whitespace-nowrap">
+                            {formatPrice(product.price)} <span className="hidden md:inline">FCFA</span>
                           </span>
                         </td>
-                        <td className="py-4 px-6">
+                        <td className="py-3 px-2 md:py-4 md:px-6">
                           <span
-                            className={`px-3 py-1 text-sm font-medium rounded-full ${
+                            className={`px-2 py-1 md:px-3 md:py-1 text-[10px] md:text-sm font-medium rounded-full whitespace-nowrap ${
                               product.stock > 20
                                 ? "bg-green-100 text-green-800"
                                 : product.stock > 10
@@ -192,11 +195,11 @@ const Products: FC = () => {
                                 : "bg-red-100 text-red-800"
                             }`}
                           >
-                            {product.stock} unités
+                            {product.stock} <span className="hidden md:inline">unités</span>
                           </span>
                         </td>
-                        <td className="py-4 px-6">
-                          <div className="flex items-center gap-2">
+                        <td className="py-3 px-2 md:py-4 md:px-6 text-right md:text-left">
+                          <div className="flex items-center justify-end md:justify-start gap-1 md:gap-2">
                             <Link
                               to={`/admin/products/edit/${product.id}`}
                               className="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"

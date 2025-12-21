@@ -88,6 +88,13 @@ const Header: FC = () => {
               {isAuthenticated ? (
                 <>
                   <Link
+                    to="/profile"
+                    className="px-4 py-2 text-sm font-medium text-gray-700 hover:text-gray-900 transition-colors flex items-center gap-2"
+                  >
+                    <FiUser className="w-4 h-4" />
+                    Mon Profil
+                  </Link>
+                  <Link
                     to="/my-orders"
                     className="px-4 py-2 text-sm font-medium text-gray-700 hover:text-gray-900 transition-colors flex items-center gap-2"
                   >
@@ -175,6 +182,14 @@ const Header: FC = () => {
             <div className="space-y-2 pt-4 border-t border-gray-200">
               {isAuthenticated ? (
                 <>
+                  <Link
+                    to="/profile"
+                    onClick={() => setIsMenuOpen(false)}
+                    className="flex items-center justify-center gap-2 w-full py-3 px-4 border border-gray-300 rounded-lg text-base font-medium text-gray-700 hover:bg-gray-50 transition-colors"
+                  >
+                    <FiUser className="w-5 h-5" />
+                    Mon Profil
+                  </Link>
                   <Link
                     to="/my-orders"
                     onClick={() => setIsMenuOpen(false)}

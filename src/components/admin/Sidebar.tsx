@@ -6,7 +6,8 @@ import {
   FiUsers, 
   FiTrendingUp,
   FiChevronDown,
-  FiChevronRight
+  FiChevronRight,
+  FiUser
 } from "react-icons/fi";
 
 interface MenuItem {
@@ -60,7 +61,8 @@ const Sidebar: FC<SidebarProps> = ({ onClose }) => {
         { path: "/admin/customers", label: "Liste des Clients" },
         { path: "/admin/measurements", label: "Mesures" }
       ]
-    }
+    },
+    { path: "/admin/profile", icon: FiUser, label: "Mon Profil", exact: true }
   ];
 
   const isActive = (path: string, exact: boolean = false) => {

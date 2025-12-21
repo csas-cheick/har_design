@@ -25,7 +25,8 @@ interface Transaction {
 
 const Cash: FC = () => {
   const { user } = useAuth();
-  const [selectedDate, setSelectedDate] = useState("");
+  const [startDate, setStartDate] = useState("");
+  const [endDate, setEndDate] = useState("");
   const [showTransactionModal, setShowTransactionModal] = useState(false);
   const [transactionType, setTransactionType] = useState<"entree" | "sortie">("entree");
   const [transactions, setTransactions] = useState<Transaction[]>([]);
@@ -65,16 +66,23 @@ const Cash: FC = () => {
   };
 
   // Calculs
-  const todayTransactions = transactions.filter(t => t.timestamp.startsWith(selectedDate));
-  const totalVentes = todayTransactions.filter(t => t.type === "vente").reduce((sum, t) => sum + t.amount, 0);
-  const totalEntrees = todayTransactions.filter(t => t.type === "entree").reduce((sum, t) => sum + t.amount, 0);
-  const totalSorties = todayTransactions.filter(t => t.type === "sortie").reduce((sum, t) => sum + t.amount, 0);
+  const filteredTransactions = transactions.filter(t => {
+    const txDate = t.timestamp.split('T')[0];
+    if (startDate && endDate) return txDate >= startDate && txDate <= endDate;
+    if (startDate) return txDate >= startDate;
+    if (endDate) return txDate <= endDate;
+    return true;
+  });
+
+  const totalVentes = filteredTransactions.filter(t => t.type === "vente").reduce((sum, t) => sum + t.amount, 0);
+  const totalEntrees = filteredTransactions.filter(t => t.type === "entree").reduce((sum, t) => sum + t.amount, 0);
+  const totalSorties = filteredTransactions.filter(t => t.type === "sortie").reduce((sum, t) => sum + t.amount, 0);
   const soldeJournalier = totalVentes + totalEntrees - totalSorties;
 
   // Statistiques par mode de paiement
-  const especes = todayTransactions.filter(t => t.paymentMethod === "especes" && t.type !== "sortie").reduce((sum, t) => sum + t.amount, 0);
-  const mobile = todayTransactions.filter(t => t.paymentMethod === "mobile" && t.type !== "sortie").reduce((sum, t) => sum + t.amount, 0);
-  const carte = todayTransactions.filter(t => t.paymentMethod === "carte" && t.type !== "sortie").reduce((sum, t) => sum + t.amount, 0);
+  const especes = filteredTransactions.filter(t => t.paymentMethod === "especes" && t.type !== "sortie").reduce((sum, t) => sum + t.amount, 0);
+  const mobile = filteredTransactions.filter(t => t.paymentMethod === "mobile" && t.type !== "sortie").reduce((sum, t) => sum + t.amount, 0);
+  const carte = filteredTransactions.filter(t => t.paymentMethod === "carte" && t.type !== "sortie").reduce((sum, t) => sum + t.amount, 0);
 
   const handleAddTransaction = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -120,7 +128,7 @@ const Cash: FC = () => {
                   setTransactionType("entree");
                   setShowTransactionModal(true);
                 }}
-                className="flex items-center gap-2 bg-green-600 text-white px-4 py-2.5 rounded-lg font-medium hover:bg-green-700 transition-colors"
+                className="flex-1 md:flex-none flex items-center justify-center gap-2 bg-green-600 text-white px-4 py-2.5 rounded-lg font-medium hover:bg-green-700 transition-colors"
               >
                 <FiPlus className="w-5 h-5" />
                 Entrée
@@ -130,7 +138,7 @@ const Cash: FC = () => {
                   setTransactionType("sortie");
                   setShowTransactionModal(true);
                 }}
-                className="flex items-center gap-2 bg-red-600 text-white px-4 py-2.5 rounded-lg font-medium hover:bg-red-700 transition-colors"
+                className="flex-1 md:flex-none flex items-center justify-center gap-2 bg-red-600 text-white px-4 py-2.5 rounded-lg font-medium hover:bg-red-700 transition-colors"
               >
                 <FiMinus className="w-5 h-5" />
                 Sortie
@@ -144,33 +152,43 @@ const Cash: FC = () => {
               {/* Date Selector */}
               <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 print:hidden">
                 <h3 className="text-sm font-semibold text-gray-900 mb-4">Période</h3>
-                <div className="flex items-center gap-3">
-                  <FiCalendar className="w-5 h-5 text-gray-400" />
-                  <input
-                    type="date"
-                    aria-label="Sélectionner une date"
-                    value={selectedDate}
-                    onChange={(e) => setSelectedDate(e.target.value)}
-                    className="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-black focus:border-transparent"
-                  />
-                  {selectedDate && (
+                <div className="space-y-3">
+                  <div className="flex items-center gap-2">
+                    <span className="text-sm text-gray-500 w-8">Du</span>
+                    <input
+                      type="date"
+                      value={startDate}
+                      onChange={(e) => setStartDate(e.target.value)}
+                      className="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-black text-sm"
+                    />
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <span className="text-sm text-gray-500 w-8">Au</span>
+                    <input
+                      type="date"
+                      value={endDate}
+                      onChange={(e) => setEndDate(e.target.value)}
+                      className="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-black text-sm"
+                    />
+                  </div>
+                  {(startDate || endDate) && (
                     <button
-                      onClick={() => setSelectedDate("")}
-                      className="p-2 text-gray-400 hover:text-red-500 transition-colors"
-                      title="Effacer le filtre"
+                      onClick={() => { setStartDate(""); setEndDate(""); }}
+                      className="w-full flex items-center justify-center gap-2 text-sm text-red-600 hover:bg-red-50 p-2 rounded-lg transition-colors"
                     >
-                      <FiX className="w-5 h-5" />
+                      <FiX className="w-4 h-4" />
+                      Effacer les filtres
                     </button>
                   )}
                 </div>
                 <p className="text-sm text-gray-600 mt-3">
-                  {todayTransactions.length} transaction{todayTransactions.length > 1 ? "s" : ""}
+                  {filteredTransactions.length} transaction{filteredTransactions.length > 1 ? "s" : ""}
                 </p>
               </div>
 
               {/* Stats Summary */}
               <div className="bg-gradient-to-br from-gray-900 to-gray-800 rounded-xl shadow-sm p-6 text-white print:hidden">
-                <h3 className="text-sm font-semibold mb-4 opacity-90">{selectedDate ? "Résumé du jour" : "Résumé Global"}</h3>
+                <h3 className="text-sm font-semibold mb-4 opacity-90">{(startDate || endDate) ? "Résumé de la période" : "Résumé Global"}</h3>
                 <div className="space-y-4">
                   <div>
                     <p className="text-xs opacity-75 mb-1">Ventes sur site</p>
@@ -189,7 +207,7 @@ const Cash: FC = () => {
                   </div>
                   <div className="h-px bg-white/20"></div>
                   <div className="bg-white/10 rounded-lg p-4">
-                    <p className="text-xs opacity-75 mb-1">{selectedDate ? "Solde journalier" : "Solde Total"}</p>
+                    <p className="text-xs opacity-75 mb-1">{(startDate || endDate) ? "Solde de la période" : "Solde Total"}</p>
                     <p className={`text-2xl font-bold ${soldeJournalier >= 0 ? "text-green-400" : "text-red-400"}`}>
                       {formatPrice(soldeJournalier)} FCFA
                     </p>
@@ -246,7 +264,13 @@ const Cash: FC = () => {
                 <div className="text-right">
                   <h2 className="text-lg font-bold">RAPPORT DE CAISSE</h2>
                   <p className="text-xs text-gray-600">
-                    {new Date(selectedDate).toLocaleDateString('fr-FR', { day: '2-digit', month: '2-digit', year: 'numeric' })}
+                    {startDate && endDate 
+                      ? `Du ${new Date(startDate).toLocaleDateString('fr-FR')} au ${new Date(endDate).toLocaleDateString('fr-FR')}`
+                      : startDate 
+                      ? `Depuis le ${new Date(startDate).toLocaleDateString('fr-FR')}`
+                      : endDate
+                      ? `Jusqu'au ${new Date(endDate).toLocaleDateString('fr-FR')}`
+                      : "Rapport Global"}
                   </p>
                   <p className="text-xs text-gray-500">
                     Imprimé: {new Date().toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' })}
@@ -257,27 +281,27 @@ const Cash: FC = () => {
             </div>
 
             <div className="p-4 md:p-6 border-b border-gray-200 print:hidden">
-              <h3 className="text-lg font-bold text-gray-900">Transactions du jour</h3>
+              <h3 className="text-lg font-bold text-gray-900">Transactions</h3>
             </div>
             <div className="overflow-x-auto">
-              <table className="w-full min-w-[600px] print:text-sm">
+              <table className="w-full print:text-sm">
                 <thead className="bg-gray-50 print:bg-gray-100">
                   <tr>
-                    <th className="text-left py-3 px-4 md:px-6 text-sm font-semibold text-gray-900 print:py-2 print:px-3">Date</th>
-                    <th className="text-left py-3 px-4 md:px-6 text-sm font-semibold text-gray-900 print:py-2 print:px-3">Type</th>
+                    <th className="hidden md:table-cell text-left py-3 px-4 md:px-6 text-sm font-semibold text-gray-900 print:py-2 print:px-3">Date</th>
+                    <th className="hidden md:table-cell text-left py-3 px-4 md:px-6 text-sm font-semibold text-gray-900 print:py-2 print:px-3">Type</th>
                     <th className="text-left py-3 px-4 md:px-6 text-sm font-semibold text-gray-900 print:py-2 print:px-3">Description</th>
-                    <th className="text-left py-3 px-4 md:px-6 text-sm font-semibold text-gray-900 print:py-2 print:px-3">Paiement</th>
+                    <th className="hidden md:table-cell text-left py-3 px-4 md:px-6 text-sm font-semibold text-gray-900 print:py-2 print:px-3">Paiement</th>
                     <th className="text-right py-3 px-4 md:px-6 text-sm font-semibold text-gray-900 print:py-2 print:px-3">Montant</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-gray-200">
-                  {todayTransactions.length > 0 ? (
-                    todayTransactions.map((transaction) => (
+                  {filteredTransactions.length > 0 ? (
+                    filteredTransactions.map((transaction) => (
                       <tr key={transaction.id} className="hover:bg-gray-50 transition-colors print:hover:bg-transparent">
-                        <td className="py-4 px-4 md:px-6 text-sm text-gray-600 print:py-1.5 print:px-3">
+                        <td className="hidden md:table-cell py-4 px-4 md:px-6 text-sm text-gray-600 print:py-1.5 print:px-3">
                           {formatDate(transaction.timestamp)}
                         </td>
-                        <td className="py-4 px-4 md:px-6 print:py-1.5 print:px-3">
+                        <td className="hidden md:table-cell py-4 px-4 md:px-6 print:py-1.5 print:px-3">
                           <span
                             className={`inline-flex items-center gap-1 px-3 py-1 text-sm font-medium rounded-full print:px-2 print:py-0.5 print:text-xs ${
                               transaction.type === "vente"
@@ -297,22 +321,40 @@ const Cash: FC = () => {
                             {transaction.type === "vente" ? "Vente" : transaction.type === "entree" ? "Entrée" : "Sortie"}
                           </span>
                         </td>
-                        <td className="py-4 px-4 md:px-6 text-sm text-gray-900 print:py-1.5 print:px-3">
-                          {transaction.description}
+                        <td className="py-3 px-4 md:py-4 md:px-6 text-sm text-gray-900 print:py-1.5 print:px-3">
+                          <div className="font-medium">{transaction.description}</div>
+                          <div className="md:hidden flex items-center gap-2 mt-1 text-xs text-gray-500">
+                            <span>{formatDate(transaction.timestamp)}</span>
+                            <span>•</span>
+                            <span className="capitalize">{transaction.paymentMethod === "especes" ? "Espèces" : transaction.paymentMethod === "mobile" ? "Mobile" : "Carte"}</span>
+                          </div>
                         </td>
-                        <td className="py-4 px-4 md:px-6 print:py-1.5 print:px-3">
+                        <td className="hidden md:table-cell py-4 px-4 md:px-6 print:py-1.5 print:px-3">
                           <span className="text-sm text-gray-600 capitalize print:text-xs">
                             {transaction.paymentMethod === "especes" ? "Espèces" : transaction.paymentMethod === "mobile" ? "Mobile Money" : "Carte"}
                           </span>
                         </td>
-                        <td className="py-4 px-4 md:px-6 text-right print:py-1.5 print:px-3">
+                        <td className="py-3 px-4 md:py-4 md:px-6 text-right print:py-1.5 print:px-3">
                           <span
-                            className={`font-semibold print:text-sm ${
+                            className={`font-bold text-sm md:text-base print:text-sm ${
                               transaction.type === "sortie" ? "text-red-600" : "text-green-600"
                             }`}
                           >
-                            {transaction.type === "sortie" ? "-" : "+"}{formatPrice(transaction.amount)} FCFA
+                            {transaction.type === "sortie" ? "-" : "+"}{formatPrice(transaction.amount)}
                           </span>
+                          <div className="md:hidden mt-1">
+                             <span
+                            className={`inline-flex items-center gap-1 px-2 py-0.5 text-[10px] font-medium rounded-full ${
+                              transaction.type === "vente"
+                                ? "bg-green-100 text-green-800"
+                                : transaction.type === "entree"
+                                ? "bg-blue-100 text-blue-800"
+                                : "bg-red-100 text-red-800"
+                            }`}
+                          >
+                            {transaction.type === "vente" ? "Vente" : transaction.type === "entree" ? "Entrée" : "Sortie"}
+                          </span>
+                          </div>
                         </td>
                       </tr>
                     ))
@@ -359,7 +401,7 @@ const Cash: FC = () => {
                 </div>
               </div>
               <div className="border-t border-gray-400 mt-2 pt-2 flex justify-between items-center">
-                <span className="text-lg font-bold">SOLDE JOURNALIER:</span>
+                <span className="text-lg font-bold">SOLDE PÉRIODE:</span>
                 <span className={`text-lg font-bold ${soldeJournalier >= 0 ? "text-green-600" : "text-red-600"}`}>
                   {formatPrice(soldeJournalier)} FCFA
                 </span>
@@ -382,7 +424,7 @@ const Cash: FC = () => {
                   onClick={() => setShowTransactionModal(false)}
                   className="text-gray-400 hover:text-gray-600"
                 >
-                  <FiMinus className="w-6 h-6" />
+                  <FiX className="w-6 h-6" />
                 </button>
               </div>
               <form onSubmit={handleAddTransaction} className="space-y-4">
