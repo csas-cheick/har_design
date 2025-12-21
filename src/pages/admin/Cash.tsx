@@ -4,7 +4,6 @@ import {
   FiPlus,
   FiMinus,
   FiPrinter,
-  FiCalendar,
   FiCreditCard,
   FiTrendingUp,
   FiX
