@@ -37,25 +37,37 @@ const Orders: FC = () => {
   const [orders, setOrders] = useState<Order[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
+  const [updating, setUpdating] = useState(false);
 
   useEffect(() => {
     const q = query(collection(db, "orders"), orderBy("createdAt", "desc"));
-    const unsubscribe = onSnapshot(q, (snapshot) => {
-      const ordersData = snapshot.docs.map(doc => ({
-        id: doc.id,
-        ...doc.data()
-      })) as Order[];
-      setOrders(ordersData);
-      setLoading(false);
-    });
+    const unsubscribe = onSnapshot(q, 
+      (snapshot) => {
+        const ordersData = snapshot.docs.map(doc => ({
+          id: doc.id,
+          ...doc.data()
+        })) as Order[];
+        setOrders(ordersData);
+        setLoading(false);
+      },
+      (error) => {
+        console.error("Error fetching orders:", error);
+        setLoading(false);
+      }
+    );
 
     return () => unsubscribe();
   }, []);
 
   const handleStatusUpdate = async (orderId: string, newStatus: Order["status"]) => {
+    if (updating) return;
+    setUpdating(true);
+    
     try {
       const order = orders.find(o => o.id === orderId);
-      if (!order) return;
+      if (!order) {
+        throw new Error("Commande non trouvée");
+      }
 
       // Si la commande passe à "completed" (Livré) et qu'elle n'était pas déjà livrée
       if (newStatus === "completed" && order.status !== "completed") {
@@ -66,19 +78,23 @@ const Orders: FC = () => {
         batch.update(orderRef, { status: newStatus });
 
         // Décrémenter le stock pour chaque article
-        order.items.forEach(item => {
-          const productRef = doc(db, "products", item.id);
-          batch.update(productRef, {
-            stock: increment(-item.quantity)
+        if (order.items && order.items.length > 0) {
+          order.items.forEach(item => {
+            if (item.id) {
+              const productRef = doc(db, "products", item.id);
+              batch.update(productRef, {
+                stock: increment(-item.quantity)
+              });
+            }
           });
-        });
+        }
 
         // Enregistrer la transaction dans la caisse
         const transactionRef = doc(collection(db, "transactions"));
         batch.set(transactionRef, {
           type: "vente",
-          amount: order.total,
-          description: `Commande Web #${order.id.slice(0, 8)} - ${order.customerName}`,
+          amount: order.total || 0,
+          description: `Commande Web #${order.id.slice(0, 8)} - ${order.customerName || "Client"}`,
           paymentMethod: "especes", // Par défaut paiement à la livraison
           timestamp: new Date().toISOString(),
           userId: user?.id || "system",
@@ -95,6 +111,8 @@ const Orders: FC = () => {
     } catch (error) {
       console.error("Error updating order status:", error);
       alert("Une erreur est survenue lors de la mise à jour du statut");
+    } finally {
+      setUpdating(false);
     }
   };
 

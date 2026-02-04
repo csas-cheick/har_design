@@ -6,7 +6,6 @@ import {
   FiPackage,
   FiUpload
 } from "react-icons/fi";
-import { useAuth } from "../../context/AuthContext";
 import { db } from "../../firebase";
 import { collection, addDoc, updateDoc, doc, getDoc } from "firebase/firestore";
 import { uploadToCloudinary } from "../../utils/cloudinary";
@@ -14,7 +13,6 @@ import { uploadToCloudinary } from "../../utils/cloudinary";
 const ProductForm: FC = () => {
   const { id } = useParams();
   const navigate = useNavigate();
-  const { user } = useAuth();
   const isEditMode = !!id;
   const [loading, setLoading] = useState(false);
   const [imageFile, setImageFile] = useState<File | null>(null);
@@ -139,12 +137,7 @@ const ProductForm: FC = () => {
                 </p>
               </div>
             </div>
-            <div className="text-right">
-              <p className="text-sm font-medium text-gray-900">
-                {user?.firstName} {user?.lastName}
-              </p>
-              <p className="text-xs text-gray-500">{user?.role}</p>
-            </div>
+            {/* Espace réservé pour info utilisateur si nécessaire */}
           </div>
         </div>
       </header>

@@ -27,7 +27,10 @@ const ClientOrders: FC = () => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    if (!user) return;
+    if (!user) {
+      setLoading(false);
+      return;
+    }
 
     const q = query(
       collection(db, "orders"),
@@ -35,14 +38,20 @@ const ClientOrders: FC = () => {
       orderBy("createdAt", "desc")
     );
 
-    const unsubscribe = onSnapshot(q, (snapshot) => {
-      const ordersData = snapshot.docs.map(doc => ({
-        id: doc.id,
-        ...doc.data()
-      })) as Order[];
-      setOrders(ordersData);
-      setLoading(false);
-    });
+    const unsubscribe = onSnapshot(q, 
+      (snapshot) => {
+        const ordersData = snapshot.docs.map(doc => ({
+          id: doc.id,
+          ...doc.data()
+        })) as Order[];
+        setOrders(ordersData);
+        setLoading(false);
+      },
+      (error) => {
+        console.error("Error fetching orders:", error);
+        setLoading(false);
+      }
+    );
 
     return () => unsubscribe();
   }, [user]);

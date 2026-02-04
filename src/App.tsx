@@ -22,6 +22,7 @@ import CustomOrders from "./pages/admin/CustomOrders";
 import AdminProfile from "./pages/admin/AdminProfile";
 import ClientOrders from "./pages/ClientOrders";
 import Profile from "./pages/Profile";
+import ProductDetail from "./pages/ProductDetail";
 import { CartProvider } from "./context/CartContext";
 import { AuthProvider, useAuth } from "./context/AuthContext";
 
@@ -50,7 +51,7 @@ const App: FC = () => {
             <Route path="/login" element={<Login />} />
             <Route path="/register" element={<Register />} />
             
-            {/* Admin Routes */}
+            {/* Admin Routes - Sans WhatsApp Button */}
             <Route
               path="/admin/*"
               element={
@@ -72,26 +73,31 @@ const App: FC = () => {
               }
             />
             
-            {/* Main Routes - Avec Header/Footer */}
+            {/* Main Routes (Client) - Avec Header/Footer et WhatsApp Button */}
             <Route
               path="/*"
               element={
-                <div className="min-h-screen bg-gray-50 flex flex-col">
-                  <Header />
-                  <main className="flex-1">
-                    <Routes>
-                      <Route path="/" element={<Accueil />} />
-                      <Route path="/shop" element={<Shop />} />
-                      <Route path="/about" element={<About />} />
-                      <Route path="/contact" element={<Contact />} />
-                      <Route path="/cart" element={<Cart />} />
-                      <Route path="/my-orders" element={<ClientOrders />} />
-                      <Route path="/profile" element={<Profile />} />
-                    </Routes>
-                  </main>
+                <>
+                  <div className="min-h-screen bg-gray-50 flex flex-col">
+                    <Header />
+                    <main className="flex-1">
+                      <Routes>
+                        <Route path="/" element={<Accueil />} />
+                        <Route path="/shop" element={<Shop />} />
+                        <Route path="/product/:id" element={<ProductDetail />} />
+                        <Route path="/product/:type/:id" element={<ProductDetail />} />
+                        <Route path="/about" element={<About />} />
+                        <Route path="/contact" element={<Contact />} />
+                        <Route path="/cart" element={<Cart />} />
+                        <Route path="/my-orders" element={<ClientOrders />} />
+                        <Route path="/profile" element={<Profile />} />
+                      </Routes>
+                    </main>
+                    <Footer />
+                  </div>
+                  {/* WhatsApp Button - Uniquement côté client */}
                   <WhatsAppButton />
-                  <Footer />
-                </div>
+                </>
               }
             />
           </Routes>

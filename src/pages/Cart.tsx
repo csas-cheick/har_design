@@ -47,15 +47,43 @@ const Cart: FC = () => {
       return;
     }
 
+    // Validation des champs
+    if (!formData.name.trim()) {
+      alert("Veuillez entrer votre nom");
+      return;
+    }
+    if (!formData.phone.trim()) {
+      alert("Veuillez entrer votre numéro de téléphone");
+      return;
+    }
+    if (!formData.address.trim()) {
+      alert("Veuillez entrer votre adresse de livraison");
+      return;
+    }
+    if (cartItems.length === 0) {
+      alert("Votre panier est vide");
+      return;
+    }
+
     setLoading(true);
 
     try {
+      // Préparer les items avec seulement les données nécessaires
+      const orderItems = cartItems.map(item => ({
+        id: item.id,
+        name: item.name,
+        price: item.price,
+        quantity: item.quantity,
+        image: item.image,
+        category: item.category
+      }));
+
       await addDoc(collection(db, "orders"), {
         userId: user.id,
-        customerName: formData.name,
-        customerPhone: formData.phone,
-        customerAddress: formData.address,
-        items: cartItems,
+        customerName: formData.name.trim(),
+        customerPhone: formData.phone.trim(),
+        customerAddress: formData.address.trim(),
+        items: orderItems,
         subtotal,
         shipping,
         total,
@@ -64,11 +92,11 @@ const Cart: FC = () => {
       });
 
       clearCart();
-      alert("Commande passée avec succès !");
-      navigate("/shop");
+      alert("Commande passée avec succès ! Nous vous contacterons bientôt.");
+      navigate("/my-orders");
     } catch (error) {
       console.error("Error placing order:", error);
-      alert("Une erreur est survenue lors de la commande");
+      alert("Une erreur est survenue lors de la commande. Veuillez réessayer.");
     } finally {
       setLoading(false);
     }

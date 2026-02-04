@@ -29,6 +29,9 @@ const Cash: FC = () => {
   const [showTransactionModal, setShowTransactionModal] = useState(false);
   const [transactionType, setTransactionType] = useState<"entree" | "sortie">("entree");
   const [transactions, setTransactions] = useState<Transaction[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [submitting, setSubmitting] = useState(false);
 
   const [formData, setFormData] = useState({
     amount: "",
@@ -37,14 +40,24 @@ const Cash: FC = () => {
   });
 
   useEffect(() => {
+    setLoading(true);
+    setError(null);
     const q = query(collection(db, "transactions"), orderBy("timestamp", "desc"));
-    const unsubscribe = onSnapshot(q, (snapshot) => {
-      const transactionsData = snapshot.docs.map(doc => ({
-        id: doc.id,
-        ...doc.data()
-      })) as Transaction[];
-      setTransactions(transactionsData);
-    });
+    const unsubscribe = onSnapshot(q, 
+      (snapshot) => {
+        const transactionsData = snapshot.docs.map(doc => ({
+          id: doc.id,
+          ...doc.data()
+        })) as Transaction[];
+        setTransactions(transactionsData);
+        setLoading(false);
+      },
+      (err) => {
+        console.error("Error fetching transactions:", err);
+        setError("Erreur lors du chargement des transactions. Veuillez réessayer.");
+        setLoading(false);
+      }
+    );
 
     return () => unsubscribe();
   }, []);
@@ -85,19 +98,35 @@ const Cash: FC = () => {
 
   const handleAddTransaction = async (e: React.FormEvent) => {
     e.preventDefault();
+    
+    // Validation
+    const amount = parseFloat(formData.amount);
+    if (isNaN(amount) || amount <= 0) {
+      alert("Veuillez entrer un montant valide");
+      return;
+    }
+    if (!formData.description.trim()) {
+      alert("Veuillez entrer une description");
+      return;
+    }
+
+    setSubmitting(true);
     try {
       await addDoc(collection(db, "transactions"), {
         type: transactionType,
-        amount: parseFloat(formData.amount),
-        description: formData.description,
+        amount: amount,
+        description: formData.description.trim(),
         paymentMethod: formData.paymentMethod,
         timestamp: new Date().toISOString(),
-        userId: user?.id
+        userId: user?.id || "unknown"
       });
       setShowTransactionModal(false);
       setFormData({ amount: "", description: "", paymentMethod: "especes" });
     } catch (error) {
       console.error("Error adding transaction: ", error);
+      alert("Erreur lors de l'ajout de la transaction. Veuillez réessayer.");
+    } finally {
+      setSubmitting(false);
     }
   };
 
@@ -153,20 +182,26 @@ const Cash: FC = () => {
                 <h3 className="text-sm font-semibold text-gray-900 mb-4">Période</h3>
                 <div className="space-y-3">
                   <div className="flex items-center gap-2">
-                    <span className="text-sm text-gray-500 w-8">Du</span>
+                    <label htmlFor="startDate" className="text-sm text-gray-500 w-8">Du</label>
                     <input
+                      id="startDate"
                       type="date"
                       value={startDate}
                       onChange={(e) => setStartDate(e.target.value)}
+                      title="Date de début"
+                      aria-label="Date de début"
                       className="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-black text-sm"
                     />
                   </div>
                   <div className="flex items-center gap-2">
-                    <span className="text-sm text-gray-500 w-8">Au</span>
+                    <label htmlFor="endDate" className="text-sm text-gray-500 w-8">Au</label>
                     <input
+                      id="endDate"
                       type="date"
                       value={endDate}
                       onChange={(e) => setEndDate(e.target.value)}
+                      title="Date de fin"
+                      aria-label="Date de fin"
                       className="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-black text-sm"
                     />
                   </div>
@@ -294,7 +329,16 @@ const Cash: FC = () => {
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-gray-200">
-                  {filteredTransactions.length > 0 ? (
+                  {loading ? (
+                    <tr>
+                      <td colSpan={5} className="py-12 text-center">
+                        <div className="flex flex-col items-center justify-center text-gray-500">
+                          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900 mb-3"></div>
+                          <p className="font-medium">Chargement des transactions...</p>
+                        </div>
+                      </td>
+                    </tr>
+                  ) : filteredTransactions.length > 0 ? (
                     filteredTransactions.map((transaction) => (
                       <tr key={transaction.id} className="hover:bg-gray-50 transition-colors print:hover:bg-transparent">
                         <td className="hidden md:table-cell py-4 px-4 md:px-6 text-sm text-gray-600 print:py-1.5 print:px-3">
@@ -370,6 +414,13 @@ const Cash: FC = () => {
                 </tbody>
               </table>
             </div>
+
+            {/* Error Message */}
+            {error && (
+              <div className="p-4 bg-red-50 border-t border-red-200">
+                <p className="text-red-600 text-sm text-center">{error}</p>
+              </div>
+            )}
 
             {/* Print Footer - Totals - Only visible when printing */}
             <div className="hidden print:block print:mt-4 print:pt-3 border-t-2 border-black">
@@ -479,17 +530,19 @@ const Cash: FC = () => {
                   <button
                     type="button"
                     onClick={() => setShowTransactionModal(false)}
-                    className="flex-1 px-4 py-3 border border-gray-300 rounded-lg font-medium hover:bg-gray-50 transition-colors"
+                    disabled={submitting}
+                    className="flex-1 px-4 py-3 border border-gray-300 rounded-lg font-medium hover:bg-gray-50 transition-colors disabled:opacity-50"
                   >
                     Annuler
                   </button>
                   <button
                     type="submit"
-                    className={`flex-1 px-4 py-3 rounded-lg font-medium text-white transition-colors ${
+                    disabled={submitting}
+                    className={`flex-1 px-4 py-3 rounded-lg font-medium text-white transition-colors disabled:opacity-50 ${
                       transactionType === "entree" ? "bg-green-600 hover:bg-green-700" : "bg-red-600 hover:bg-red-700"
                     }`}
                   >
-                    Ajouter
+                    {submitting ? "En cours..." : "Ajouter"}
                   </button>
                 </div>
               </form>

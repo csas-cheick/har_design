@@ -1,5 +1,13 @@
 @import "tailwindcss";
 
+/* WhatsApp Button - z-index élevé pour être visible partout */
+.whatsapp-button {
+  position: fixed !important;
+  bottom: 1.5rem;
+  right: 1.5rem;
+  z-index: 9999 !important;
+}
+
 @keyframes wave {
   0%, 100% {
     transform: rotate(0deg);

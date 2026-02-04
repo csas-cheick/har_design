@@ -1,6 +1,7 @@
 import { FC, useState, useEffect } from "react";
-import { FiX, FiGrid, FiList, FiHeart, FiFilter } from "react-icons/fi";
+import { FiX, FiGrid, FiList, FiHeart, FiFilter, FiShoppingBag } from "react-icons/fi";
 import { useCart } from "../context/CartContext";
+import { useNavigate } from "react-router-dom";
 import { db } from "../firebase";
 import { collection, onSnapshot, query, orderBy } from "firebase/firestore";
 import { motion, AnimatePresence } from "framer-motion";
@@ -20,34 +21,63 @@ const Shop: FC = () => {
   const [sortBy, setSortBy] = useState("newest");
   const [showFilters, setShowFilters] = useState(false);
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
+  const [loading, setLoading] = useState(true);
   const { addToCart } = useCart();
+  const navigate = useNavigate();
   const [products, setProducts] = useState<Product[]>([]);
   const [regularProducts, setRegularProducts] = useState<Product[]>([]);
   const [coutureModels, setCoutureModels] = useState<Product[]>([]);
 
   useEffect(() => {
+    let productsLoaded = false;
+    let modelsLoaded = false;
+
+    const checkLoading = () => {
+      if (productsLoaded && modelsLoaded) {
+        setLoading(false);
+      }
+    };
+
     // Listen to regular products
     const qProducts = query(collection(db, "products"), orderBy("name"));
-    const unsubscribeProducts = onSnapshot(qProducts, (snapshot) => {
-      const productsData = snapshot.docs.map(doc => ({
-        id: doc.id,
-        ...doc.data(),
-        isModel: false
-      })) as Product[];
-      setRegularProducts(productsData);
-    });
+    const unsubscribeProducts = onSnapshot(qProducts, 
+      (snapshot) => {
+        const productsData = snapshot.docs.map(doc => ({
+          id: doc.id,
+          ...doc.data(),
+          isModel: false
+        })) as Product[];
+        setRegularProducts(productsData);
+        productsLoaded = true;
+        checkLoading();
+      },
+      (error) => {
+        console.error("Error fetching products:", error);
+        productsLoaded = true;
+        checkLoading();
+      }
+    );
 
     // Listen to couture models
     const qModels = query(collection(db, "couture_models"), orderBy("name"));
-    const unsubscribeModels = onSnapshot(qModels, (snapshot) => {
-      const modelsData = snapshot.docs.map(doc => ({
-        id: doc.id,
-        ...doc.data(),
-        category: "Couture", // Ensure category is set
-        isModel: true
-      })) as Product[];
-      setCoutureModels(modelsData);
-    });
+    const unsubscribeModels = onSnapshot(qModels, 
+      (snapshot) => {
+        const modelsData = snapshot.docs.map(doc => ({
+          id: doc.id,
+          ...doc.data(),
+          category: "Couture", // Ensure category is set
+          isModel: true
+        })) as Product[];
+        setCoutureModels(modelsData);
+        modelsLoaded = true;
+        checkLoading();
+      },
+      (error) => {
+        console.error("Error fetching couture models:", error);
+        modelsLoaded = true;
+        checkLoading();
+      }
+    );
 
     return () => {
       unsubscribeProducts();
@@ -84,6 +114,14 @@ const Shop: FC = () => {
 
   const formatPrice = (price: number) => {
     return price.toString().replace(/\B(?=(\d{3})+(?!\d))/g, " ");
+  };
+
+  const handleProductClick = (product: Product) => {
+    if (product.isModel) {
+      navigate(`/product/couture/${product.id}`);
+    } else {
+      navigate(`/product/${product.id}`);
+    }
   };
 
   return (
@@ -196,6 +234,7 @@ const Shop: FC = () => {
                     exit={{ opacity: 0 }}
                     key={product.id}
                     className="group cursor-pointer"
+                    onClick={() => handleProductClick(product)}
                   >
                     <div className="relative aspect-[3/4] bg-gray-100 mb-2 md:mb-4 overflow-hidden">
                       <img
@@ -207,19 +246,34 @@ const Shop: FC = () => {
                       {/* Overlay Actions */}
                       <div className="absolute inset-0 bg-black/0 group-hover:bg-black/5 transition-colors duration-300" />
                       
-                      <div className="absolute bottom-0 left-0 right-0 p-4 translate-y-full group-hover:translate-y-0 transition-transform duration-300 flex gap-2 justify-center">
+                      {/* Desktop: hover effect */}
+                      <div className="hidden md:flex absolute bottom-0 left-0 right-0 p-4 translate-y-full group-hover:translate-y-0 transition-transform duration-300 gap-2 justify-center">
                         {!product.isModel && (
                           <button 
                             onClick={(e) => {
                               e.stopPropagation();
                               addToCart(product);
                             }}
-                            className="bg-white text-black px-6 py-3 text-xs font-bold tracking-widest hover:bg-black hover:text-white transition-colors shadow-lg hidden md:block"
+                            className="bg-white text-black px-6 py-3 text-xs font-bold tracking-widest hover:bg-black hover:text-white transition-colors shadow-lg"
                           >
                             AJOUTER
                           </button>
                         )}
                       </div>
+
+                      {/* Mobile: always visible button */}
+                      {!product.isModel && (
+                        <button 
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            addToCart(product);
+                          }}
+                          className="md:hidden absolute bottom-2 right-2 bg-black text-white p-2 rounded-full shadow-lg active:scale-95 transition-transform"
+                          aria-label="Ajouter au panier"
+                        >
+                          <FiShoppingBag className="w-4 h-4" />
+                        </button>
+                      )}
 
                       {/* Badges */}
                       <div className="absolute top-3 left-3 flex flex-col gap-2">
@@ -248,6 +302,7 @@ const Shop: FC = () => {
                     exit={{ opacity: 0 }}
                     key={product.id}
                     className="flex gap-6 group cursor-pointer border-b border-gray-100 pb-8"
+                    onClick={() => handleProductClick(product)}
                   >
                     <div className="w-40 aspect-[3/4] bg-gray-100 overflow-hidden flex-shrink-0">
                       <img

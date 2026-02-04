@@ -18,35 +18,62 @@ const Dashboard: FC = () => {
   const [productsCount, setProductsCount] = useState(0);
   const [customersCount, setCustomersCount] = useState(0);
   const [loading, setLoading] = useState(true);
+  const [dataLoaded, setDataLoaded] = useState({
+    orders: false,
+    customOrders: false,
+    transactions: false,
+    products: false,
+    customers: false
+  });
 
   useEffect(() => {
     // 1. Fetch Boutique Orders
     const qOrders = query(collection(db, "orders"), orderBy("createdAt", "desc"));
     const unsubOrders = onSnapshot(qOrders, (snapshot) => {
       setBoutiqueOrders(snapshot.docs.map(doc => ({ id: doc.id, type: 'boutique', ...doc.data() })));
+      setDataLoaded(prev => ({ ...prev, orders: true }));
+    }, (error) => {
+      console.error("Error fetching orders:", error);
+      setDataLoaded(prev => ({ ...prev, orders: true }));
     });
 
     // 2. Fetch Custom Orders
     const qCustomOrders = query(collection(db, "custom_orders"), orderBy("createdAt", "desc"));
     const unsubCustomOrders = onSnapshot(qCustomOrders, (snapshot) => {
       setCustomOrders(snapshot.docs.map(doc => ({ id: doc.id, type: 'couture', ...doc.data() })));
+      setDataLoaded(prev => ({ ...prev, customOrders: true }));
+    }, (error) => {
+      console.error("Error fetching custom orders:", error);
+      setDataLoaded(prev => ({ ...prev, customOrders: true }));
     });
 
     // 3. Fetch Transactions (Cash)
     const qTransactions = query(collection(db, "transactions"));
     const unsubTransactions = onSnapshot(qTransactions, (snapshot) => {
       setTransactions(snapshot.docs.map(doc => doc.data()));
+      setDataLoaded(prev => ({ ...prev, transactions: true }));
+    }, (error) => {
+      console.error("Error fetching transactions:", error);
+      setDataLoaded(prev => ({ ...prev, transactions: true }));
     });
 
     // 4. Fetch Products Count
     const unsubProducts = onSnapshot(collection(db, "products"), (snapshot) => {
       setProductsCount(snapshot.size);
+      setDataLoaded(prev => ({ ...prev, products: true }));
+    }, (error) => {
+      console.error("Error fetching products:", error);
+      setDataLoaded(prev => ({ ...prev, products: true }));
     });
 
     // 5. Fetch Customers Count
     const qUsers = query(collection(db, "users"), where("role", "==", "user"));
     const unsubUsers = onSnapshot(qUsers, (snapshot) => {
       setCustomersCount(snapshot.size);
+      setDataLoaded(prev => ({ ...prev, customers: true }));
+    }, (error) => {
+      console.error("Error fetching customers:", error);
+      setDataLoaded(prev => ({ ...prev, customers: true }));
     });
 
     return () => {
@@ -57,6 +84,14 @@ const Dashboard: FC = () => {
       unsubUsers();
     };
   }, []);
+
+  // Set loading to false when all data is loaded
+  useEffect(() => {
+    const allLoaded = Object.values(dataLoaded).every(Boolean);
+    if (allLoaded) {
+      setLoading(false);
+    }
+  }, [dataLoaded]);
 
   // Derived State
   const cashBalance = transactions.reduce((acc, curr) => {
@@ -72,12 +107,6 @@ const Dashboard: FC = () => {
       return dateB.getTime() - dateA.getTime();
     })
     .slice(0, 5);
-
-  useEffect(() => {
-    if (boutiqueOrders.length || customOrders.length || productsCount || customersCount || transactions.length) {
-      setLoading(false);
-    }
-  }, [boutiqueOrders, customOrders, productsCount, customersCount, transactions]);
 
   const statCards = [
     { 
